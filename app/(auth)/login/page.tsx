@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/stores/auth-store"
+import { AccountRole } from "@/lib/api/types/user.types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,12 +27,17 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      await login(email, password)
+      await login({ email, password })
       toast.success("Welcome back!", {
         description: "You have successfully logged in.",
       })
-      router.push("/admin")
-    } catch (error) {
+      const userRole = useAuthStore.getState().user?.role
+      if (userRole === AccountRole.ADMIN) {
+        router.push("/admin")
+      } else {
+        router.push("/")
+      }
+    } catch {
       toast.error("Login failed", {
         description: "Please check your credentials and try again.",
       })
@@ -108,9 +114,8 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p className="mb-2">Demo accounts:</p>
             <div className="space-y-1 text-xs">
-              <p>Admin: admin@demo.io</p>
-              <p>Manager: manager@demo.io</p>
-              <p>Staff: staff@demo.io</p>
+              <p>Admin: administrator@localhost</p>
+              <p>pwd: Administrator1!</p>
             </div>
           </div>
         </CardContent>

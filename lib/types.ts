@@ -1,12 +1,12 @@
 // Core types for the packaging management system
 
-export type UserRole = "admin" | "manager" | "staff"
+export type AccountRole = "admin" | "manager" | "staff"
 
-export interface User {
+export interface Account {
   id: string
   email: string
   name: string
-  role: UserRole
+  role: AccountRole
   avatar?: string
 }
 

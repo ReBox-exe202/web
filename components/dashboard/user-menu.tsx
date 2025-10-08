@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { LogOut, Settings, User } from "lucide-react"
 import { toast } from "sonner"
 
-export function UserMenu() {
+export function AccountMenu() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const router = useRouter()
@@ -30,8 +30,12 @@ export function UserMenu() {
 
   if (!user) return null
 
-  const initials = user.name
+  const displayName =
+    user.username || user.fullName || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "User"
+
+  const initials = displayName
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
@@ -41,11 +45,11 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-3 rounded-lg hover:bg-accent p-2 transition-colors">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+            <AvatarImage src={user.avatar || "/placeholder.svg"} alt={displayName} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="hidden md:block text-left">
-            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-sm font-medium">{user.username || displayName}</p>
             <Badge variant="secondary" className="text-xs">
               {user.role}
             </Badge>
@@ -55,7 +59,7 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-sm font-medium">{user.username || displayName}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>

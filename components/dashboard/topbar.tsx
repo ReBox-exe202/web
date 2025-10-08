@@ -4,7 +4,7 @@ import { Menu, Search, Bell, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUIStore } from "@/stores/theme-store"
-import { UserMenu } from "./user-menu"
+import { AccountMenu } from "./user-menu"
 
 export function Topbar() {
   const { theme, setTheme, toggleSidebar } = useUIStore()
@@ -36,7 +36,7 @@ export function Topbar() {
           <Bell className="h-5 w-5" />
         </Button>
 
-        <UserMenu />
+        <AccountMenu />
       </div>
     </header>
   )
