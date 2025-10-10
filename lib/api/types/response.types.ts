@@ -13,13 +13,13 @@
 export interface ApiResponse<T = unknown> {
     data: T;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
 }
 
 export interface ApiResponse<T = unknown> {
     data: T;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
 }
 
 export interface ApiResponseDemo<T = unknown> {
@@ -45,7 +45,7 @@ export interface PaginatedResponse<T> {
         hasPrevious: boolean;
     };
     message: string;
-    isSuccess: boolean;
+    success: boolean;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface ListResponse<T> {
     items: T[];
     total: number;
     message: string;
-    isSuccess: boolean;
+    success: boolean;
 }
 
 /**
@@ -73,16 +73,16 @@ export interface ListResponse<T> {
  */
 export interface SuccessResponse {
     message: string;
-    isSuccess: true;
+    success: true;
 }
 
 /**
  * Type guard to check if response is successful
  */
-export function isSuccessResponse<T>(
+export function successResponse<T>(
     response: ApiResponse<T> | BaseResponse<T>
 ): response is ApiResponse<T> {
-    return "isSuccess" in response && response.isSuccess === true;
+    return "success" in response && response.success === true;
 }
 
 /**

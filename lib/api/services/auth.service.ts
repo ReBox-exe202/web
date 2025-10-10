@@ -75,7 +75,7 @@ const AuthService = {
         const resp = await axiosClient.get<ApiResponse<AccountProfile>>(
             "/profile"
         );
-        if (resp && resp.data && resp.data.isSuccess && resp.data.data) {
+        if (resp && resp.data && resp.data.success && resp.data.data) {
             return resp.data.data;
         }
         throw new Error(
@@ -88,7 +88,7 @@ const AuthService = {
             "/profile",
             data
         );
-        if (resp && resp.data && resp.data.isSuccess && resp.data.data) {
+        if (resp && resp.data && resp.data.success && resp.data.data) {
             return resp.data.data;
         }
         throw new Error(
