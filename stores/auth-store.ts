@@ -5,35 +5,18 @@ import type { Account } from "@/lib/api/types/user.types";
 import { AccountRole } from "@/lib/api/types/user.types";
 import { setToken } from "@/lib/token";
 
-// Manual rehydrate from localStorage 'auth-storage'
+// Do not access localStorage at module import time. The app should rehydrate
+// the auth store on the client inside a useEffect to avoid SSR/CSR mismatches.
 let initialUser: Account | null = null;
 let initialToken: string | null = null;
 let initialIsAuthenticated = false;
-if (typeof window !== "undefined") {
-    try {
-        const raw = localStorage.getItem("auth-storage");
-        if (raw) {
-            const parsed = JSON.parse(raw) as Record<string, unknown>;
-            if (parsed.user && typeof parsed.user === "object") {
-                initialUser = parsed.user as Account;
-            }
-            if (typeof parsed.token === "string") {
-                initialToken = parsed.token;
-                setToken(initialToken);
-            }
-            if (typeof parsed.isAuthenticated === "boolean") {
-                initialIsAuthenticated = parsed.isAuthenticated;
-            }
-        }
-    } catch {
-        /* ignore parse errors */
-    }
-}
 
 interface AuthState {
     user: Account | null;
     token: string | null;
     isAuthenticated: boolean;
+    // Rehydrate from localStorage on demand (call from a client effect).
+    rehydrate: () => void;
     login: (credentials: LoginRequest) => Promise<void>;
     logout: () => Promise<void>;
     signOut: () => void;
@@ -44,6 +27,32 @@ export const useAuthStore = create<AuthState>()((set) => ({
     user: initialUser,
     token: initialToken,
     isAuthenticated: initialIsAuthenticated,
+    rehydrate: () => {
+        if (typeof window === "undefined") return
+        try {
+            const raw = localStorage.getItem("auth-storage")
+            if (!raw) return
+            const parsed = JSON.parse(raw) as Record<string, unknown>
+            let token: string | null = null
+            let user: Account | null = null
+            let isAuthenticated = false
+            if (parsed.user && typeof parsed.user === "object") {
+                user = parsed.user as Account
+            }
+            if (typeof parsed.token === "string") {
+                token = parsed.token
+                try {
+                    setToken(token)
+                } catch {}
+            }
+            if (typeof parsed.isAuthenticated === "boolean") {
+                isAuthenticated = parsed.isAuthenticated
+            }
+            set({ user, token, isAuthenticated })
+        } catch {
+            /* ignore */
+        }
+    },
     login: async (credentials: LoginRequest) => {
         const data = await AuthService.login(credentials);
         if (data && data.accessToken) {

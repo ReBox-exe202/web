@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Settings, Leaf } from "lucide-react"
+import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Settings, Leaf, QrCode } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/stores/theme-store"
 
@@ -14,6 +14,7 @@ const navigation = [
   { name: "Inventory", href: "/inventory", icon: Package },
   { name: "Partners", href: "/partners", icon: Users },
   { name: "Returns", href: "/returns", icon: RotateCcw },
+  { name: "QR", href: "/qr", icon: QrCode },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 

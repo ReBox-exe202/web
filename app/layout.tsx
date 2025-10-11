@@ -24,10 +24,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body
         className="antialiased"
       >
+        {/* Apply theme before React hydrate to avoid DOM/class mismatch */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            try{
+              const raw = localStorage.getItem('ui-storage');
+              if(raw){
+                const parsed = JSON.parse(raw);
+                if(parsed && parsed.state && parsed.state.theme){
+                  document.documentElement.classList.toggle('dark', parsed.state.theme === 'dark');
+                }
+              }
+            }catch(e){}
+          })();
+        ` }} />
         {children}
         <Toaster />
       </body>

@@ -266,7 +266,7 @@ export default function PartnersPage() {
               <Label htmlFor="type">Partner Type</Label>
               <Select
                 value={formData.type}
-                onValueChange={(value) => setFormData({ ...formData, type: value as Partner["type"] })}
+                // onValueChange={(value) => setFormData({ ...formData, type: value as Partner["type"] })}
               >
                 <SelectTrigger id="type">
                   <SelectValue />
