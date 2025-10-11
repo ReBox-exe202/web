@@ -46,8 +46,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
     isAuthenticated: initialIsAuthenticated,
     login: async (credentials: LoginRequest) => {
         const data = await AuthService.login(credentials);
-        if (data && data.token) {
-            const token = data.token;
+        if (data && data.accessToken) {
+            const token = data.accessToken;
             // persist token and auth snapshot to localStorage so it survives reloads
             if (typeof window !== "undefined") {
                 try {

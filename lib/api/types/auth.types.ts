@@ -17,10 +17,8 @@ export interface LoginRequest {
  */
 export interface LoginResponse {
     status: string;
-    message: string;
-    token: string;
-    expired: string;
-    userId: string;
+    expiresAt: string;
+    accessToken: string;
     refreshToken?: string;
 }
 

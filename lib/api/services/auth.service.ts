@@ -9,7 +9,7 @@ import type {
     ChangePasswordRequest,
     ForgotPasswordRequest,
     ResetPasswordRequest,
-    LoginResponseDemo,
+    LoginResponse,
 } from "../types/auth.types";
 import type {
     SuccessResponse,
@@ -44,7 +44,7 @@ function getMessageFromResponse(resp: unknown): string | undefined {
 
 const AuthService = {
     login: async (credentials: LoginRequest) => {
-        const result = await postApi<LoginRequest, LoginResponseDemo>(
+        const result = await postApi<LoginRequest, LoginResponse>(
             "auth/login",
             credentials
         );

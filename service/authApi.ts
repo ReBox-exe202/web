@@ -23,9 +23,7 @@ export const authPath = basePath("auth");
 export const AUTH_API_ENDPOINTS = createResourceEndpoints(authPath);
 
 export const authApi = {
-    login: async (
-        payload: ILoginRequest
-    ): Promise<ApiResponse<ILoginResponse>> => {
+    login: async (payload: ILoginRequest): Promise<ApiResponse<ILoginResponse>> => {
         const response = await axiosClient.post(
             AUTH_API_ENDPOINTS.CUSTOM("/login"),
             payload
