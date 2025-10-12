@@ -30,9 +30,10 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   namespace: string
   onExportCSV?: () => void
+  onRowSelectionChange?: (selectedCount: number, selectedIds: string[]) => void
 }
 
-export function DataTable<TData, TValue>({ columns, data, namespace, onExportCSV }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, namespace, onExportCSV, onRowSelectionChange }: DataTableProps<TData, TValue>) {
   const tableStore = useTableStore()
   const savedState = tableStore.getTableState(namespace)
 
@@ -64,7 +65,22 @@ export function DataTable<TData, TValue>({ columns, data, namespace, onExportCSV
       setColumnVisibility(newVisibility)
       tableStore.setColumnVisibility(namespace, newVisibility)
     },
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (updater) => {
+      const newSelection = typeof updater === "function" ? updater(rowSelection) : updater
+      setRowSelection(newSelection)
+      // Notify parent component about selection change
+      if (onRowSelectionChange) {
+        const selectedCount = Object.keys(newSelection).length
+        const selectedIds = Object.keys(newSelection)
+          .filter(key => newSelection[key])
+          .map(index => {
+            const row = table.getRowModel().rows[parseInt(index)]
+            return (row?.original as any)?.uid || ""
+          })
+          .filter(Boolean)
+        onRowSelectionChange(selectedCount, selectedIds)
+      }
+    },
     onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
