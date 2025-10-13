@@ -4,15 +4,54 @@ import { use } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Package, MapPin, Calendar, TrendingUp, User, QrCode } from "lucide-react"
+import { ArrowLeft, Package, MapPin, Calendar, TrendingUp, User, QrCode, ShoppingBag, RotateCcw, ShoppingCart } from "lucide-react"
 import Link from "next/link"
 import { mockItems } from "@/lib/mock-data"
 import { format } from "date-fns"
 import Image from "next/image"
+import { toast } from "sonner"
+import { useState } from "react"
 
 export default function PackageDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const packageItem = mockItems.find((item) => item.uid === id)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleBorrow = async () => {
+    setIsProcessing(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      toast.success("Package Borrowed", {
+        description: `Successfully borrowed ${packageItem?.uid}. Please return within 7 days.`,
+      })
+    } catch (error) {
+      toast.error("Borrow Failed", {
+        description: "Failed to borrow package. Please try again.",
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleReturn = async () => {
+    setIsProcessing(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      toast.success("Package Returned", {
+        description: `Successfully returned ${packageItem?.uid}. Thank you!`,
+      })
+    } catch (error) {
+      toast.error("Return Failed", {
+        description: "Failed to return package. Please try again.",
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   if (!packageItem) {
     return (
@@ -71,9 +110,29 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
             <p className="text-muted-foreground">Reusable packaging item details</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" disabled={isProcessing}>
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleBorrow}
+              disabled={isProcessing}
+            >
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              {isProcessing ? "Processing..." : "Borrow"}
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleReturn}
+              disabled={isProcessing}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Return
             </Button>
           </div>
         </div>
