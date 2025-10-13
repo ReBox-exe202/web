@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
@@ -17,6 +18,7 @@ export default function QRScanner() {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [cameraPermission, setCameraPermission] = useState<"prompt" | "granted" | "denied">("prompt");
   
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -147,15 +149,40 @@ export default function QRScanner() {
     setDetected(true);
     setError("");
     
-    // Show success notification
-    toast.success("QR Code Scanned!", {
-      description: `Successfully decoded: ${data.length > 50 ? data.substring(0, 50) + "..." : data}`
-    });
-    
-    setTimeout(() => setDetected(false), 1000);
-    
     stopScanning();
     setScanning(false);
+    
+    // Check if scanned data is a package URL
+    if (data.includes('/package/')) {
+      // Extract package ID and navigate
+      const match = data.match(/\/package\/([^/?#]+)/);
+      if (match && match[1]) {
+        const packageId = match[1];
+        
+        // Show success toast
+        toast.success("✅ QR Code Scanned!", {
+          description: `Redirecting to package ${packageId}...`,
+          duration: 2000,
+        });
+        
+        // Navigate after short delay for user to see success message
+        setTimeout(() => {
+          router.push(`/package/${packageId}`);
+        }, 1000);
+        
+        return;
+      }
+    }
+    
+    // If not a package URL, just show the content
+    toast.success("✅ QR Code Scanned!", {
+      description: data.startsWith('http') 
+        ? `URL: ${data}` 
+        : `Content: ${data.length > 60 ? data.substring(0, 60) + "..." : data}`,
+      duration: 5000,
+    });
+    
+    setTimeout(() => setDetected(false), 1500);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -196,13 +223,8 @@ export default function QRScanner() {
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         
         if (code && code.data) {
-          setResult(code.data);
-          setDetected(true);
-          setScanning(false);
-          toast.success("QR Code found!", {
-            description: "Successfully extracted QR code from image"
-          });
-          setTimeout(() => setDetected(false), 1000);
+          // Use handleScanSuccess to process the result (includes navigation logic)
+          handleScanSuccess(code.data);
         } else {
           toast.error("No QR code found", {
             description: "Please make sure the image contains a clear QR code"

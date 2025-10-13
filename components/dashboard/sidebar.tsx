@@ -51,7 +51,7 @@ export function Sidebar() {
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start gap-3",
+                    "w-full justify-start gap-3 cursor-pointer",
                     isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
                   )}
                 >
