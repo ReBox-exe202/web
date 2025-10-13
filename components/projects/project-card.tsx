@@ -29,7 +29,8 @@ export function ProjectCard({ project, onArchive, onDuplicate }: ProjectCardProp
   }
 
   return (
-    <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all group">
+    <Link href={`/projects/${project.id}`} className="block">
+      <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all group cursor-pointer">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -45,7 +46,12 @@ export function ProjectCard({ project, onArchive, onDuplicate }: ProjectCardProp
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => e.preventDefault()}
+              >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -99,5 +105,6 @@ export function ProjectCard({ project, onArchive, onDuplicate }: ProjectCardProp
         </div>
       </CardContent>
     </Card>
+    </Link>
   )
 }

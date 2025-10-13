@@ -15,6 +15,7 @@ const navigation = [
   { name: "Partners", href: "/partners", icon: Users },
   { name: "Returns", href: "/returns", icon: RotateCcw },
   { name: "QR", href: "/qr", icon: QrCode },
+  { name: "Package", href: "/package", icon: Package },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -36,7 +37,7 @@ export function Sidebar() {
             <Leaf className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-sidebar-foreground">Vytal</h1>
+            <h1 className="text-lg font-bold text-sidebar-foreground">Rebox</h1>
             <p className="text-xs text-muted-foreground">Packaging Manager</p>
           </div>
         </div>
@@ -64,7 +65,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="border-t border-sidebar-border p-4">
-          <p className="text-xs text-muted-foreground text-center">© 2025 Vytal System</p>
+          <p className="text-xs text-muted-foreground text-center">© 2025 Rebox System</p>
         </div>
       </div>
     </aside>

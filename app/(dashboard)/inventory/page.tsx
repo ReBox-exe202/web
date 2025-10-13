@@ -21,7 +21,8 @@ import { Card } from "@/components/ui/card"
 import { ArrowUpDown, MoreHorizontal, QrCode, Archive, RefreshCw, Filter, Download, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { QRGenerationModal } from "@/components/inventory/qr-generation-modal"
-import { generateQRCodes, downloadQRCode, downloadAllQRCodes, type QRCodeResult } from "@/lib/api/services/qr.service"
+import type { QRCodeResult } from "@/utils/generate.qr"
+import QRCode from "qrcode"
 
 const statusColors = {
   Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
@@ -80,14 +81,58 @@ export default function InventoryPage() {
     setGeneratedQRCodes([])
 
     try {
-      const response = await generateQRCodes(selectedRowIds)
+      // Generate QR codes directly from table data
+      const results: QRCodeResult[] = []
       
-      setGeneratedQRCodes(response.data)
+      for (const itemUid of selectedRowIds) {
+        try {
+          // Find item data from table
+          const item = items.find(i => i.uid === itemUid)
+          
+          if (!item) {
+            results.push({
+              itemUid,
+              qrCodeUrl: "",
+              status: "error",
+              error: "Item not found",
+            })
+            continue
+          }
+
+          // Generate QR code data with package URL
+          const qrData = `http://localhost:3000/package/${item.uid}`
+
+          // Generate QR code as data URL
+          const qrCodeUrl = await QRCode.toDataURL(qrData, {
+            width: 300,
+            margin: 2,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
+          })
+
+          results.push({
+            itemUid,
+            qrCodeUrl,
+            status: "success",
+          })
+        } catch (error) {
+          results.push({
+            itemUid,
+            qrCodeUrl: "",
+            status: "error",
+            error: "Failed to generate QR code",
+          })
+        }
+      }
+      
+      setGeneratedQRCodes(results)
       setIsGeneratingQR(false)
       
-      const successCount = response.data.filter(qr => qr.status === "success").length
+      const successCount = results.filter((qr: QRCodeResult) => qr.status === "success").length
       toast.success("QR Codes Generated", {
-        description: `Successfully generated ${successCount} of ${response.data.length} QR codes.`,
+        description: `Successfully generated ${successCount} of ${results.length} QR codes.`,
       })
     } catch (error: any) {
       setIsGeneratingQR(false)
@@ -100,13 +145,23 @@ export default function InventoryPage() {
 
   const handleDownloadAllQR = async () => {
     try {
-      const successfulItems = generatedQRCodes
-        .filter(qr => qr.status === "success")
-        .map(qr => qr.itemUid)
+      // Download all successful QR codes
+      const successfulQRs = generatedQRCodes.filter((qr: QRCodeResult) => qr.status === "success")
       
-      await downloadAllQRCodes(successfulItems)
+      for (const qr of successfulQRs) {
+        const link = document.createElement("a")
+        link.href = qr.qrCodeUrl
+        link.download = `qr-code-${qr.itemUid}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        // Add delay between downloads to prevent browser blocking
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+      
       toast.success("Download Started", {
-        description: "Your QR codes are being downloaded as a ZIP file.",
+        description: `Downloading ${successfulQRs.length} QR codes.`,
       })
     } catch (error) {
       toast.error("Download Failed", {
@@ -117,9 +172,16 @@ export default function InventoryPage() {
 
   const handleDownloadSingleQR = async (itemUid: string) => {
     try {
-      const qrCode = generatedQRCodes.find(qr => qr.itemUid === itemUid)
+      const qrCode = generatedQRCodes.find((qr: QRCodeResult) => qr.itemUid === itemUid)
       if (qrCode && qrCode.qrCodeUrl) {
-        await downloadQRCode(itemUid, qrCode.qrCodeUrl)
+        // Download QR code as PNG
+        const link = document.createElement("a")
+        link.href = qrCode.qrCodeUrl
+        link.download = `qr-code-${itemUid}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
         toast.success("Download Started", {
           description: `QR code for ${itemUid} is being downloaded.`,
         })

@@ -81,7 +81,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="org-name">Organization Name</Label>
-                <Input id="org-name" defaultValue="Vytal Packaging Co." />
+                <Input id="org-name" defaultValue="Rebox Packaging Co." />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="org-id">Organization ID</Label>
