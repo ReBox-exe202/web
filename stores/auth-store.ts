@@ -63,14 +63,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
             try {
                 const profile = await AuthService.getCurrentAccount();
                 // profile.role can be a string or an object. Normalize it to AccountRole
-                let role: Account["role"] = AccountRole.USER;
+                let role: Account["role"] = AccountRole.CONSUMER;
                 if (typeof profile.role === "string") {
                     const code = profile.role.toLowerCase();
                     if (code.includes("admin")) role = AccountRole.ADMIN;
-                    else if (code.includes("manager"))
-                        role = AccountRole.MANAGER;
+                    else if (code.includes("merchant"))
+                        role = AccountRole.MERCHANT;
                     else if (code.includes("guest")) role = AccountRole.GUEST;
-                    else role = AccountRole.USER;
+                    else role = AccountRole.CONSUMER;
                 } else if (profile.role && typeof profile.role === "object") {
                     const maybe = (profile.role as Record<string, unknown>)
                         .code;
@@ -78,9 +78,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         const code = maybe.toLowerCase();
                         if (code === "admin" || code === "administrator")
                             role = AccountRole.ADMIN;
-                        else if (code === "manager") role = AccountRole.MANAGER;
+                        else if (code === "merchant") role = AccountRole.MERCHANT;
                         else if (code === "guest") role = AccountRole.GUEST;
-                        else role = AccountRole.USER;
+                        else role = AccountRole.CONSUMER;
                     }
                 }
 
@@ -154,4 +154,5 @@ export const useAuthStore = create<AuthState>()((set) => ({
         set({ user: null, token: null, isAuthenticated: false });
     },
     setUser: (user: Account | null) => set({ user }),
+    
 }));

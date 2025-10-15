@@ -10,6 +10,7 @@ import type {
     ForgotPasswordRequest,
     ResetPasswordRequest,
     LoginResponse,
+    TokenCheckResponse,
 } from "../types/auth.types";
 import type {
     SuccessResponse,
@@ -133,6 +134,22 @@ const AuthService = {
             { email }
         );
         return result.data;
+    },
+
+    /**
+     * Validate current JWT token
+     * Used by middleware to check token validity
+     */
+    checkToken: async () => {
+        const resp = await axiosClient.get<ApiResponse<TokenCheckResponse>>(
+            "/auth/check"
+        );
+        if (resp?.data?.success && resp.data.data) {
+            return resp.data.data;
+        }
+        throw new Error(
+            getMessageFromResponse(resp) || "Token validation failed"
+        );
     },
 };
 

@@ -18,8 +18,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card } from "@/components/ui/card"
-import { ArrowUpDown, MoreHorizontal, QrCode, Archive, RefreshCw, Filter } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, QrCode, Archive, RefreshCw, Filter, Download, Plus } from "lucide-react"
 import { toast } from "sonner"
+import { QRGenerationModal } from "@/components/inventory/qr-generation-modal"
+import type { QRCodeResult } from "@/utils/generate.qr"
+import QRCode from "qrcode"
 
 const statusColors = {
   Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
@@ -31,6 +34,13 @@ export default function InventoryPage() {
   const [items, setItems] = useState<Item[]>(mockItems)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [selectedRowCount, setSelectedRowCount] = useState<number>(0)
+  const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
+  
+  // QR Generation Modal State
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false)
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false)
+  const [generatedQRCodes, setGeneratedQRCodes] = useState<QRCodeResult[]>([])
 
   const handleRetire = (uid: string) => {
     setItems(items.map((item) => (item.uid === uid ? { ...item, status: "Retired" as const } : item)))
@@ -50,6 +60,142 @@ export default function InventoryPage() {
     toast.success("QR Code generated", {
       description: `QR code for ${uid} is ready to print.`,
     })
+  }
+
+  const handleExportImage = () => {
+    toast.success("Export started", {
+      description: "Your inventory images are being generated.",
+    })
+  }
+
+  const handleGenerateQR = async () => {
+    if (selectedRowIds.length === 0) {
+      toast.error("No items selected", {
+        description: "Please select at least one item to generate QR codes.",
+      })
+      return
+    }
+
+    setIsQRModalOpen(true)
+    setIsGeneratingQR(true)
+    setGeneratedQRCodes([])
+
+    try {
+      // Generate QR codes directly from table data
+      const results: QRCodeResult[] = []
+      
+      for (const itemUid of selectedRowIds) {
+        try {
+          // Find item data from table
+          const item = items.find(i => i.uid === itemUid)
+          
+          if (!item) {
+            results.push({
+              itemUid,
+              qrCodeUrl: "",
+              status: "error",
+              error: "Item not found",
+            })
+            continue
+          }
+
+          // Generate QR code data with package URL
+          const qrData = `http://localhost:3000/package/${item.uid}`
+
+          // Generate QR code as data URL
+          const qrCodeUrl = await QRCode.toDataURL(qrData, {
+            width: 300,
+            margin: 2,
+            color: {
+              dark: "#000000",
+              light: "#FFFFFF",
+            },
+          })
+
+          results.push({
+            itemUid,
+            qrCodeUrl,
+            status: "success",
+          })
+        } catch (error) {
+          results.push({
+            itemUid,
+            qrCodeUrl: "",
+            status: "error",
+            error: "Failed to generate QR code",
+          })
+        }
+      }
+      
+      setGeneratedQRCodes(results)
+      setIsGeneratingQR(false)
+      
+      const successCount = results.filter((qr: QRCodeResult) => qr.status === "success").length
+      toast.success("QR Codes Generated", {
+        description: `Successfully generated ${successCount} of ${results.length} QR codes.`,
+      })
+    } catch (error: any) {
+      setIsGeneratingQR(false)
+      toast.error("Generation Failed", {
+        description: error.message || "Failed to generate QR codes. Please try again.",
+      })
+      setIsQRModalOpen(false)
+    }
+  }
+
+  const handleDownloadAllQR = async () => {
+    try {
+      // Download all successful QR codes
+      const successfulQRs = generatedQRCodes.filter((qr: QRCodeResult) => qr.status === "success")
+      
+      for (const qr of successfulQRs) {
+        const link = document.createElement("a")
+        link.href = qr.qrCodeUrl
+        link.download = `qr-code-${qr.itemUid}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        // Add delay between downloads to prevent browser blocking
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+      
+      toast.success("Download Started", {
+        description: `Downloading ${successfulQRs.length} QR codes.`,
+      })
+    } catch (error) {
+      toast.error("Download Failed", {
+        description: "Failed to download QR codes. Please try again.",
+      })
+    }
+  }
+
+  const handleDownloadSingleQR = async (itemUid: string) => {
+    try {
+      const qrCode = generatedQRCodes.find((qr: QRCodeResult) => qr.itemUid === itemUid)
+      if (qrCode && qrCode.qrCodeUrl) {
+        // Download QR code as PNG
+        const link = document.createElement("a")
+        link.href = qrCode.qrCodeUrl
+        link.download = `qr-code-${itemUid}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        toast.success("Download Started", {
+          description: `QR code for ${itemUid} is being downloaded.`,
+        })
+      }
+    } catch (error) {
+      toast.error("Download Failed", {
+        description: "Failed to download QR code. Please try again.",
+      })
+    }
+  }
+
+  const handleRowSelectionChange = (count: number, selectedIds: string[]) => {
+    setSelectedRowCount(count)
+    setSelectedRowIds(selectedIds)
   }
 
   const columns: ColumnDef<Item>[] = [
@@ -196,9 +342,25 @@ export default function InventoryPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
-        <p className="text-muted-foreground mt-1">Track and manage all reusable packaging items</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
+          <p className="text-muted-foreground mt-1">Track and manage all reusable packaging items</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportImage}>
+            <Download className="mr-2 h-4 w-4" />
+            Export Image
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={handleGenerateQR}
+            disabled={selectedRowCount === 0}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Generate QR {selectedRowCount > 0 && `(${selectedRowCount})`}
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -243,7 +405,23 @@ export default function InventoryPage() {
       </Card>
 
       {/* Data Table */}
-      <DataTable columns={columns} data={filteredItems} namespace="inventoryTable" />
+      <DataTable 
+        columns={columns} 
+        data={filteredItems} 
+        namespace="inventoryTable"
+        onRowSelectionChange={handleRowSelectionChange}
+      />
+
+      {/* QR Generation Modal */}
+      <QRGenerationModal
+        open={isQRModalOpen}
+        onOpenChange={setIsQRModalOpen}
+        selectedItems={selectedRowIds}
+        isLoading={isGeneratingQR}
+        qrCodes={generatedQRCodes}
+        onDownloadAll={handleDownloadAllQR}
+        onDownloadSingle={handleDownloadSingleQR}
+      />
     </div>
   )
 }

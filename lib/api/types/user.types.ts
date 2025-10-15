@@ -9,8 +9,8 @@
  */
 export enum AccountRole {
     ADMIN = "admin",
-    MANAGER = "manager",
-    USER = "user",
+    MERCHANT = "merchant",
+    CONSUMER = "consumer",
     GUEST = "guest",
 }
 

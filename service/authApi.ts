@@ -16,7 +16,7 @@ export interface ILoginRequest {
 }
 
 export const userPath = basePath("users");
-export const USER_API_ENDPOINTS = createResourceEndpoints(userPath);
+export const CONSUMER_API_ENDPOINTS = createResourceEndpoints(userPath);
 
 export const authPath = basePath("auth");
 

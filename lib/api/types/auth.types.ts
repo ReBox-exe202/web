@@ -5,6 +5,20 @@
  */
 
 /**
+ * Token validation response
+ */
+export interface TokenCheckResponse {
+    id: string;
+    email: string;
+    username: string;
+    role: string;
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    isVerified?: boolean;
+}
+
+/**
  * Login request payload
  */
 export interface LoginRequest {
