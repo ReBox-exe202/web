@@ -24,7 +24,7 @@ export function Sidebar() {
   // const user = useAuthStore((state) => state.user);
   //   const userRole = user?.role || AccountRole.GUEST;
   //   const navigation = getNavigationByRole(userRole);
-    
+
   const pathname = usePathname()
   const sidebarOpen = useUIStore((state) => state.sidebarOpen)
   const toggleSidebar = useUIStore((state) => state.toggleSidebar)
@@ -73,7 +73,7 @@ export function Sidebar() {
               <Leaf className="w-6 h-6 text-primary-foreground" />
             </div>
             <div className="flex-1">
-              <h1 className="text-lg font-bold text-sidebar-foreground">Vytal</h1>
+              <h1 className="text-lg font-bold text-sidebar-foreground">Rebox</h1>
               <p className="text-xs text-muted-foreground">Packaging Manager</p>
             </div>
             {/* Close button - only visible on mobile */}
@@ -88,33 +88,33 @@ export function Sidebar() {
             </Button>
           </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Link key={item.name} href={item.href}>
-                <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start gap-3 cursor-pointer",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
-                </Button>
-              </Link>
-            )
-          })}
-        </nav>
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1 px-3 py-4">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link key={item.name} href={item.href}>
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start gap-3 cursor-pointer",
+                      isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.name}
+                  </Button>
+                </Link>
+              )
+            })}
+          </nav>
 
-        {/* Footer */}
-        <div className="border-t border-sidebar-border p-4">
-          <p className="text-xs text-muted-foreground text-center">© 2025 Vytal System</p>
+          {/* Footer */}
+          <div className="border-t border-sidebar-border p-4">
+            <p className="text-xs text-muted-foreground text-center">© 2025 Rebox System</p>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
     </>
   )
 }

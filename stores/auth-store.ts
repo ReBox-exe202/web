@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import AuthService from "@/lib/api/services/auth.service";
-import type { LoginRequest } from "@/lib/api/types/auth.types";
-import type { Account } from "@/lib/api/types/user.types";
-import { AccountRole } from "@/lib/api/types/user.types";
+import type { LoginRequest } from "@/types/auth.types";
+import type { Account } from "@/types/user.types";
+import { AccountRole } from "@/types/user.types";
 import { setToken } from "@/lib/token";
 
 // Manual rehydrate from localStorage 'auth-storage'
@@ -78,7 +78,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         const code = maybe.toLowerCase();
                         if (code === "admin" || code === "administrator")
                             role = AccountRole.ADMIN;
-                        else if (code === "merchant") role = AccountRole.MERCHANT;
+                        else if (code === "merchant")
+                            role = AccountRole.MERCHANT;
                         else if (code === "guest") role = AccountRole.GUEST;
                         else role = AccountRole.CONSUMER;
                     }
@@ -154,5 +155,4 @@ export const useAuthStore = create<AuthState>()((set) => ({
         set({ user: null, token: null, isAuthenticated: false });
     },
     setUser: (user: Account | null) => set({ user }),
-    
 }));
