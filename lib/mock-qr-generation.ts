@@ -3,8 +3,8 @@
  * This simulates backend API responses for QR generation
  */
 
+import { GenerateQRResponse, QRCodeResult } from "@/types/qr.types"
 import QRCode from "qrcode"
-import type { GenerateQRResponse, QRCodeResult } from "@/utils/generate.qr"
 
 /**
  * Generate a QR code as data URL (base64 PNG)
@@ -29,7 +29,7 @@ async function generateQRCodeDataURL(data: string): Promise<string> {
  * Mock function to simulate QR code generation API call
  * Simulates network delay and returns QR codes as base64 images
  */
-export async function mockGenerateQRCodes(itemUids: string[]): Promise<GenerateQRResponse> {
+export async function mockGenerateQRCodes(itemIds: string[]): Promise<GenerateQRResponse> {
   // Simulate network delay (1-3 seconds)
   const delay = 1000 + Math.random() * 2000
   await new Promise((resolve) => setTimeout(resolve, delay))
@@ -37,33 +37,33 @@ export async function mockGenerateQRCodes(itemUids: string[]): Promise<GenerateQ
   // Generate QR codes for each item
   const results: QRCodeResult[] = []
 
-  for (const itemUid of itemUids) {
+  for (const itemId of itemIds) {
     try {
       // Simulate 10% failure rate for testing error handling
       const shouldFail = Math.random() < 0.1
 
       if (shouldFail) {
         results.push({
-          itemUid,
+          itemId,
           qrCodeUrl: "",
           status: "error",
           error: "Failed to generate QR code",
         })
       } else {
         // Generate QR code containing package URL
-        const qrData = `${window.location.origin}/package/${itemUid}`
+        const qrData = `${window.location.origin}/package/${itemId}`
 
         const qrCodeUrl = await generateQRCodeDataURL(qrData)
 
         results.push({
-          itemUid,
+          itemId,
           qrCodeUrl,
           status: "success",
         })
       }
     } catch (error) {
       results.push({
-        itemUid,
+        itemId,
         qrCodeUrl: "",
         status: "error",
         error: "QR generation failed",
@@ -86,8 +86,8 @@ export async function mockGenerateQRCodes(itemUids: string[]): Promise<GenerateQ
 /**
  * Mock function to generate QR code for single item (for testing)
  */
-export async function mockGenerateSingleQR(itemUid: string): Promise<string> {
-  const qrData = `${window.location.origin}/package/${itemUid}`
+export async function mockGenerateSingleQR(itemId: string): Promise<string> {
+  const qrData = `${window.location.origin}/package/${itemId}`
 
   return await generateQRCodeDataURL(qrData)
 }
@@ -115,11 +115,11 @@ export const QR_TEST_SCENARIOS = {
 /**
  * Mock download functions for testing
  */
-export async function mockDownloadQRCode(itemUid: string, qrCodeUrl: string): Promise<void> {
+export async function mockDownloadQRCode(itemId: string, qrCodeUrl: string): Promise<void> {
   // Create a link and trigger download
   const link = document.createElement("a")
   link.href = qrCodeUrl
-  link.download = `qr-code-${itemUid}.png`
+  link.download = `qr-code-${itemId}.png`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -130,7 +130,7 @@ export async function mockDownloadAllQRCodes(qrCodes: QRCodeResult[]): Promise<v
   // For mock, we'll download each individually with a delay
   for (const qr of qrCodes) {
     if (qr.status === "success" && qr.qrCodeUrl) {
-      await mockDownloadQRCode(qr.itemUid, qr.qrCodeUrl)
+      await mockDownloadQRCode(qr.itemId, qr.qrCodeUrl)
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
   }

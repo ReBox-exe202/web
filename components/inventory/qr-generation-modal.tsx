@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Image from "next/image"
 
 interface QRCode {
-  itemUid: string
+  itemId: string
   qrCodeUrl: string
   status: "success" | "error"
   error?: string
@@ -22,7 +22,7 @@ interface QRGenerationModalProps {
   isLoading: boolean
   qrCodes: QRCode[]
   onDownloadAll?: () => void
-  onDownloadSingle?: (itemUid: string) => void
+  onDownloadSingle?: (itemId: string) => void
 }
 
 export function QRGenerationModal({
@@ -78,17 +78,17 @@ export function QRGenerationModal({
             <ScrollArea className="h-[400px] pr-4">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {qrCodes.map((qrCode) => (
-                  <Card key={qrCode.itemUid} className="p-4 space-y-3">
+                  <Card key={qrCode.itemId} className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <Badge variant={qrCode.status === "success" ? "default" : "destructive"}>
-                        {qrCode.itemUid}
+                        {qrCode.itemId}
                       </Badge>
                       {qrCode.status === "success" && (
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => onDownloadSingle?.(qrCode.itemUid)}
+                          onClick={() => onDownloadSingle?.(qrCode.itemId)}
                         >
                           <Download className="h-3 w-3" />
                         </Button>
@@ -99,7 +99,7 @@ export function QRGenerationModal({
                       <div className="relative aspect-square bg-white rounded-lg overflow-hidden border">
                         <Image
                           src={qrCode.qrCodeUrl}
-                          alt={`QR Code for ${qrCode.itemUid}`}
+                          alt={`QR Code for ${qrCode.itemId}`}
                           fill
                           className="object-contain p-2"
                         />

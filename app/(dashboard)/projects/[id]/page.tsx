@@ -174,11 +174,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <CardContent>
               <div className="space-y-3">
                 {projectItems.map((item) => (
-                  <div key={item.uid} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border">
                     <div className="flex items-center gap-3">
                       <Package className="h-5 w-5 text-muted-foreground" />
                       <div>
-                        <p className="font-mono font-medium">{item.uid}</p>
+                        <p className="font-mono font-medium">{item.id}</p>
                         <p className="text-sm text-muted-foreground">
                           {item.type} - {item.size} - {item.cycles} cycles
                         </p>

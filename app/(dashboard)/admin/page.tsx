@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-3">
                     <Package className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">{transaction.itemUid}</p>
+                      <p className="text-sm font-medium">{transaction.itemId}</p>
                       <p className="text-xs text-muted-foreground">Borrower: {transaction.borrowerAnonId}</p>
                     </div>
                   </div>

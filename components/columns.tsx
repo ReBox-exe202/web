@@ -62,16 +62,16 @@ export const createColumns = (
     cell: ({ row }) => <div className="font-mono text-sm">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "itemUid",
+    accessorKey: "itemId",
     header: ({ column }) => {
       return (
         <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-          Item UID
+          Item ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="font-mono text-sm font-medium">{row.getValue("itemUid")}</div>,
+    cell: ({ row }) => <div className="font-mono text-sm font-medium">{row.getValue("itemId")}</div>,
   },
   {
     accessorKey: "borrowerAnonId",

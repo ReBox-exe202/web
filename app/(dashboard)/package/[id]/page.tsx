@@ -14,7 +14,7 @@ import { useState } from "react"
 
 export default function PackageDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const packageItem = mockItems.find((item) => item.uid === id)
+  const packageItem = mockItems.find((item) => item.id === id)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handleBorrow = async () => {
@@ -24,7 +24,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       toast.success("Package Borrowed", {
-        description: `Successfully borrowed ${packageItem?.uid}. Please return within 7 days.`,
+        description: `Successfully borrowed ${packageItem?.id}. Please return within 7 days.`,
       })
     } catch (error) {
       toast.error("Borrow Failed", {
@@ -42,7 +42,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       toast.success("Package Returned", {
-        description: `Successfully returned ${packageItem?.uid}. Thank you!`,
+        description: `Successfully returned ${packageItem?.id}. Thank you!`,
       })
     } catch (error) {
       toast.error("Return Failed", {
@@ -102,7 +102,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold tracking-tight font-mono">{packageItem.uid}</h1>
+              <h1 className="text-3xl font-bold tracking-tight font-mono">{packageItem.id}</h1>
               <Badge variant="secondary" className={statusColors[packageItem.status]}>
                 {packageItem.status}
               </Badge>
@@ -238,7 +238,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">UID</p>
-                  <p className="text-lg font-mono font-bold">{packageItem.uid}</p>
+                  <p className="text-lg font-mono font-bold">{packageItem.id}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>

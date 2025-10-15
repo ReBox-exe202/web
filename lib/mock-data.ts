@@ -3,7 +3,7 @@ import type { Item, Transaction, Partner, Project } from "./types"
 // Mock Items
 export const mockItems: Item[] = [
   {
-    uid: "CUP-001",
+    id: "CUP-001",
     type: "cup",
     size: "M",
     cycles: 12,
@@ -12,7 +12,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-01-15"),
   },
   {
-    uid: "CUP-002",
+    id: "CUP-002",
     type: "cup",
     size: "L",
     cycles: 8,
@@ -21,7 +21,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-01-20"),
   },
   {
-    uid: "BOX-001",
+    id: "BOX-001",
     type: "box",
     size: "L",
     cycles: 15,
@@ -30,7 +30,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-01-10"),
   },
   {
-    uid: "BOX-002",
+    id: "BOX-002",
     type: "box",
     size: "M",
     cycles: 20,
@@ -39,7 +39,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-01-05"),
   },
   {
-    uid: "BOWL-001",
+    id: "BOWL-001",
     type: "bowl",
     size: "S",
     cycles: 5,
@@ -48,7 +48,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-02-01"),
   },
   {
-    uid: "BOWL-002",
+    id: "BOWL-002",
     type: "bowl",
     size: "M",
     cycles: 18,
@@ -57,7 +57,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2023-12-01"),
   },
   {
-    uid: "CUP-003",
+    id: "CUP-003",
     type: "cup",
     size: "S",
     cycles: 10,
@@ -66,7 +66,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-01-25"),
   },
   {
-    uid: "CUP-004",
+    id: "CUP-004",
     type: "cup",
     size: "M",
     cycles: 7,
@@ -75,7 +75,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2024-02-05"),
   },
   {
-    uid: "BOX-003",
+    id: "BOX-003",
     type: "box",
     size: "S",
     cycles: 22,
@@ -84,7 +84,7 @@ export const mockItems: Item[] = [
     createdAt: new Date("2023-12-15"),
   },
   {
-    uid: "BOWL-003",
+    id: "BOWL-003",
     type: "bowl",
     size: "L",
     cycles: 14,
@@ -98,7 +98,7 @@ export const mockItems: Item[] = [
 export const mockTransactions: Transaction[] = [
   {
     id: "TXN-001",
-    itemUid: "CUP-001",
+    itemId: "CUP-001",
     partnerId: "PTR-001",
     borrowerAnonId: "USR-A123",
     status: "Borrowed",
@@ -108,7 +108,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-002",
-    itemUid: "BOX-001",
+    itemId: "BOX-001",
     partnerId: "PTR-002",
     borrowerAnonId: "USR-B456",
     status: "Overdue",
@@ -118,7 +118,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-003",
-    itemUid: "BOWL-001",
+    itemId: "BOWL-001",
     partnerId: "PTR-003",
     borrowerAnonId: "USR-C789",
     status: "Returned",
@@ -128,7 +128,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-004",
-    itemUid: "CUP-002",
+    itemId: "CUP-002",
     partnerId: "PTR-001",
     borrowerAnonId: "USR-D012",
     status: "Borrowed",
@@ -137,7 +137,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-005",
-    itemUid: "BOX-002",
+    itemId: "BOX-002",
     partnerId: "PTR-004",
     borrowerAnonId: "USR-E345",
     status: "Sanitizing",
@@ -148,7 +148,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-006",
-    itemUid: "CUP-003",
+    itemId: "CUP-003",
     partnerId: "PTR-002",
     borrowerAnonId: "USR-F678",
     status: "Lost",
@@ -158,7 +158,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-007",
-    itemUid: "BOWL-003",
+    itemId: "BOWL-003",
     partnerId: "PTR-003",
     borrowerAnonId: "USR-G901",
     status: "Returned",
@@ -168,7 +168,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-008",
-    itemUid: "CUP-004",
+    itemId: "CUP-004",
     partnerId: "PTR-001",
     borrowerAnonId: "USR-H234",
     status: "Borrowed",
@@ -177,7 +177,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-009",
-    itemUid: "BOX-003",
+    itemId: "BOX-003",
     partnerId: "PTR-004",
     borrowerAnonId: "USR-I567",
     status: "Overdue",
@@ -187,7 +187,7 @@ export const mockTransactions: Transaction[] = [
   },
   {
     id: "TXN-010",
-    itemUid: "BOWL-002",
+    itemId: "BOWL-002",
     partnerId: "PTR-002",
     borrowerAnonId: "USR-J890",
     status: "Returned",

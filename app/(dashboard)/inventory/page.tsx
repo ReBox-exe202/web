@@ -21,8 +21,8 @@ import { Card } from "@/components/ui/card"
 import { ArrowUpDown, MoreHorizontal, QrCode, Archive, RefreshCw, Filter, Download, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { QRGenerationModal } from "@/components/inventory/qr-generation-modal"
-import type { QRCodeResult } from "@/utils/generate.qr"
 import QRCode from "qrcode"
+import { QRCodeResult } from "@/types/qr.types"
 
 const statusColors = {
   Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
@@ -42,23 +42,23 @@ export default function InventoryPage() {
   const [isGeneratingQR, setIsGeneratingQR] = useState(false)
   const [generatedQRCodes, setGeneratedQRCodes] = useState<QRCodeResult[]>([])
 
-  const handleRetire = (uid: string) => {
-    setItems(items.map((item) => (item.uid === uid ? { ...item, status: "Retired" as const } : item)))
+  const handleRetire = (id: string) => {
+    setItems(items.map((item) => (item.id === id ? { ...item, status: "Retired" as const } : item)))
     toast.success("Item retired", {
       description: "The item has been marked as retired.",
     })
   }
 
-  const handleReactivate = (uid: string) => {
-    setItems(items.map((item) => (item.uid === uid ? { ...item, status: "Active" as const } : item)))
+  const handleReactivate = (id: string) => {
+    setItems(items.map((item) => (item.id === id ? { ...item, status: "Active" as const } : item)))
     toast.success("Item reactivated", {
       description: "The item is now active again.",
     })
   }
 
-  const handlePrintQR = (uid: string) => {
+  const handlePrintQR = (id: string) => {
     toast.success("QR Code generated", {
-      description: `QR code for ${uid} is ready to print.`,
+      description: `QR code for ${id} is ready to print.`,
     })
   }
 
@@ -84,14 +84,14 @@ export default function InventoryPage() {
       // Generate QR codes directly from table data
       const results: QRCodeResult[] = []
       
-      for (const itemUid of selectedRowIds) {
+      for (const itemId of selectedRowIds) {
         try {
           // Find item data from table
-          const item = items.find(i => i.uid === itemUid)
+          const item = items.find(i => i.id === itemId)
           
           if (!item) {
             results.push({
-              itemUid,
+              itemId,
               qrCodeUrl: "",
               status: "error",
               error: "Item not found",
@@ -100,7 +100,7 @@ export default function InventoryPage() {
           }
 
           // Generate QR code data with package URL
-          const qrData = `${window.location.origin}/package/${item.uid}`
+          const qrData = `${window.location.origin}/package/${item.id}`
 
           // Generate QR code as data URL
           const qrCodeUrl = await QRCode.toDataURL(qrData, {
@@ -113,13 +113,13 @@ export default function InventoryPage() {
           })
 
           results.push({
-            itemUid,
+            itemId,
             qrCodeUrl,
             status: "success",
           })
         } catch (error) {
           results.push({
-            itemUid,
+            itemId,
             qrCodeUrl: "",
             status: "error",
             error: "Failed to generate QR code",
@@ -151,7 +151,7 @@ export default function InventoryPage() {
       for (const qr of successfulQRs) {
         const link = document.createElement("a")
         link.href = qr.qrCodeUrl
-        link.download = `qr-code-${qr.itemUid}.png`
+        link.download = `qr-code-${qr.itemId}.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -170,20 +170,20 @@ export default function InventoryPage() {
     }
   }
 
-  const handleDownloadSingleQR = async (itemUid: string) => {
+  const handleDownloadSingleQR = async (itemId: string) => {
     try {
-      const qrCode = generatedQRCodes.find((qr: QRCodeResult) => qr.itemUid === itemUid)
+      const qrCode = generatedQRCodes.find((qr: QRCodeResult) => qr.itemId === itemId)
       if (qrCode && qrCode.qrCodeUrl) {
         // Download QR code as PNG
         const link = document.createElement("a")
         link.href = qrCode.qrCodeUrl
-        link.download = `qr-code-${itemUid}.png`
+        link.download = `qr-code-${itemId}.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
         
         toast.success("Download Started", {
-          description: `QR code for ${itemUid} is being downloaded.`,
+          description: `QR code for ${itemId} is being downloaded.`,
         })
       }
     } catch (error) {
@@ -219,7 +219,7 @@ export default function InventoryPage() {
       enableHiding: false,
     },
     {
-      accessorKey: "uid",
+      accessorKey: "id",
       header: ({ column }) => {
         return (
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
@@ -228,7 +228,7 @@ export default function InventoryPage() {
           </Button>
         )
       },
-      cell: ({ row }) => <div className="font-mono font-medium">{row.getValue("uid")}</div>,
+      cell: ({ row }) => <div className="font-mono font-medium">{row.getValue("id")}</div>,
     },
     {
       accessorKey: "type",
@@ -310,18 +310,18 @@ export default function InventoryPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handlePrintQR(item.uid)}>
+              <DropdownMenuItem onClick={() => handlePrintQR(item.id)}>
                 <QrCode className="mr-2 h-4 w-4" />
                 Print QR Code
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {item.status === "Active" ? (
-                <DropdownMenuItem onClick={() => handleRetire(item.uid)}>
+                <DropdownMenuItem onClick={() => handleRetire(item.id)}>
                   <Archive className="mr-2 h-4 w-4" />
                   Retire Item
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => handleReactivate(item.uid)}>
+                <DropdownMenuItem onClick={() => handleReactivate(item.id)}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Reactivate Item
                 </DropdownMenuItem>
