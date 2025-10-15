@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import AuthService from "@/services/auth.service";
-import type { LoginRequest } from "@/types/auth.types";
+import type { LoginRequest, RegisterRequest } from "@/types/auth.types";
 import type { Account } from "@/types/user.types";
 import { AccountRole } from "@/types/user.types";
 import { setToken } from "@/lib/token";
@@ -35,6 +35,7 @@ interface AuthState {
     token: string | null;
     isAuthenticated: boolean;
     login: (credentials: LoginRequest) => Promise<void>;
+    register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
     signOut: () => void;
     setUser: (user: Account | null) => void;
@@ -127,6 +128,91 @@ export const useAuthStore = create<AuthState>()((set) => ({
             }
         } else {
             throw new Error("Invalid login response");
+        }
+    },
+    register: async (data: RegisterRequest) => {
+        const response = await AuthService.register(data);
+        if (response && response.accessToken) {
+            const token = response.accessToken;
+            // persist token and auth snapshot to localStorage so it survives reloads
+            if (typeof window !== "undefined") {
+                try {
+                    // will be overwritten later with full profile
+                    localStorage.setItem(
+                        "auth-storage",
+                        JSON.stringify({ token, isAuthenticated: true })
+                    );
+                } catch {}
+            }
+            // set in-memory token used by axios interceptor
+            setToken(token);
+            try {
+                const profile = await AuthService.getCurrentAccount();
+                // profile.role can be a string or an object. Normalize it to AccountRole
+                let role: Account["role"] = AccountRole.CONSUMER;
+                if (typeof profile.role === "string") {
+                    const code = profile.role.toLowerCase();
+                    if (code.includes("admin")) role = AccountRole.ADMIN;
+                    else if (code.includes("merchant"))
+                        role = AccountRole.MERCHANT;
+                    else if (code.includes("guest")) role = AccountRole.GUEST;
+                    else role = AccountRole.CONSUMER;
+                } else if (profile.role && typeof profile.role === "object") {
+                    const maybe = (profile.role as Record<string, unknown>)
+                        .code;
+                    if (typeof maybe === "string") {
+                        const code = maybe.toLowerCase();
+                        if (code === "admin" || code === "administrator")
+                            role = AccountRole.ADMIN;
+                        else if (code === "merchant")
+                            role = AccountRole.MERCHANT;
+                        else if (code === "guest") role = AccountRole.GUEST;
+                        else role = AccountRole.CONSUMER;
+                    }
+                }
+
+                const mapped: Account = {
+                    id: String(profile.id),
+                    email: profile.email,
+                    username: profile.username || profile.email,
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                    fullName:
+                        profile.firstName && profile.lastName
+                            ? `${profile.firstName} ${profile.lastName}`
+                            : profile.username || profile.email,
+                    avatar: profile.avatar,
+                    role,
+                    status: "active" as Account["status"],
+                    createdAt: profile.createdAt,
+                } as Account;
+                set({ user: mapped, token, isAuthenticated: true });
+                // persist full auth snapshot
+                if (typeof window !== "undefined") {
+                    try {
+                        localStorage.setItem(
+                            "auth-storage",
+                            JSON.stringify({
+                                user: mapped,
+                                token,
+                                isAuthenticated: true,
+                            })
+                        );
+                    } catch {}
+                }
+            } catch {
+                set({ token, isAuthenticated: true });
+                if (typeof window !== "undefined") {
+                    try {
+                        localStorage.setItem(
+                            "auth-storage",
+                            JSON.stringify({ token, isAuthenticated: true })
+                        );
+                    } catch {}
+                }
+            }
+        } else {
+            throw new Error("Invalid registration response");
         }
     },
     logout: async () => {

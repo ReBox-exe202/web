@@ -37,23 +37,14 @@ export interface LoginResponse {
 }
 
 /**
- * Login response
- */
-export interface LoginResponseDemo {
-    token: string;
-    role: string;
-}
-
-/**
  * Register request payload
  */
 export interface RegisterRequest {
     email: string;
-    username: string;
+    phone: string;
     password: string;
-    confirmPassword: string;
-    firstName?: string;
-    lastName?: string;
+    userName: string;
+    fullName: string;
 }
 
 /**
@@ -61,8 +52,9 @@ export interface RegisterRequest {
  */
 export interface RegisterResponse {
     status: string;
-    message: string;
-    userId: string;
+    expiresAt: string;
+    accessToken: string;
+    refreshToken?: string;
 }
 
 /**

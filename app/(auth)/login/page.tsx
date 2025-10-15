@@ -37,10 +37,26 @@ export default function LoginPage() {
       } else {
         router.push("/")
       }
-    } catch {
-      toast.error("Login failed", {
-        description: "Please check your credentials and try again.",
-      })
+    } catch (error: any) {
+      // Handle API validation errors
+      if (error?.response?.data?.errors) {
+        const errors = error.response.data.errors
+        const errorMessages = Object.entries(errors)
+          .map(([field, messages]) => `${field}: ${(messages as string[]).join(", ")}`)
+          .join("\n")
+
+        toast.error(error.response.data.title || "Validation failed", {
+          description: errorMessages,
+        })
+      } else if (error?.response?.data?.message) {
+        toast.error("Login failed", {
+          description: error.response.data.message,
+        })
+      } else if (error?.message) {
+        toast.error("Login failed", {
+          description: error.message,
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -117,6 +133,16 @@ export default function LoginPage() {
               <p>Admin: administrator@localhost</p>
               <p>pwd: Administrator1!</p>
             </div>
+            Already have an account?{" "}
+            <Button
+              type="button"
+              variant="link"
+              className="px-0 text-sm"
+              onClick={() => router.push("/register")}
+              disabled={isLoading}
+            >
+              Sign Up
+            </Button>
           </div>
         </CardContent>
       </Card>

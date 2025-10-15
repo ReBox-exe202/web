@@ -54,7 +54,7 @@ const AuthService = {
 
     register: async (data: RegisterRequest) => {
         const result = await postApi<RegisterRequest, RegisterResponse>(
-            "/register",
+            "auth/register",
             data
         );
         return result.data;

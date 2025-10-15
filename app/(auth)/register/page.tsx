@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/stores/auth-store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,8 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Leaf, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useAuthStore } from "@/stores/auth-store"
 
 export default function RegisterPage() {
+  const [userName, setUserName] = useState("")
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
@@ -20,38 +21,68 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [agree, setAgree] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-//   const register = useAuthStore((state) => state.register)
+  const register = useAuthStore((state) => state.register)
+  const user = useAuthStore((state) => state.user)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // e.preventDefault()
-    // if (password !== confirmPassword) {
-    //   toast.error("Password mismatch", {
-    //     description: "Passwords do not match. Please re-enter.",
-    //   })
-    //   return
-    // }
-    // if (!agree) {
-    //   toast.error("Terms not accepted", {
-    //     description: "You must agree to the Terms and Conditions.",
-    //   })
-    //   return
-    // }
+    e.preventDefault()
+    if (password !== confirmPassword) {
+      toast.error("Password mismatch", {
+        description: "Passwords do not match. Please re-enter.",
+      })
+      return
+    }
+    if (!agree) {
+      toast.error("Terms not accepted", {
+        description: "You must agree to the Terms and Conditions.",
+      })
+      return
+    }
 
-    // setIsLoading(true)
-    // try {
-    //   await register({ fullName, email, phone, password })
-    //   toast.success("Account created successfully!", {
-    //     description: "You can now sign in with your credentials.",
-    //   })
-    //   router.push("/login")
-    // } catch {
-    //   toast.error("Registration failed", {
-    //     description: "Please check your input and try again.",
-    //   })
-    // } finally {
-    //   setIsLoading(false)
-    // }
+    setIsLoading(true)
+    try {
+      await register({ userName, fullName, email, phone, password })
+      toast.success("Welcome aboard!", {
+        description: "Your account has been created successfully. Redirecting...",
+      })
+      
+      // Redirect based on user role after registration
+      setTimeout(() => {
+        const userRole = useAuthStore.getState().user?.role
+        if (userRole === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/projects")
+        }
+      }, 1000)
+    } catch (error: any) {
+      // Handle API validation errors
+      if (error?.response?.data?.errors) {
+        const errors = error.response.data.errors
+        const errorMessages = Object.entries(errors)
+          .map(([field, messages]) => `${field}: ${(messages as string[]).join(", ")}`)
+          .join("\n")
+        
+        toast.error(error.response.data.title || "Validation failed", {
+          description: errorMessages,
+        })
+      } else if (error?.response?.data?.message) {
+        toast.error("Registration failed", {
+          description: error.response.data.message,
+        })
+      } else if (error?.message) {
+        toast.error("Registration failed", {
+          description: error.message,
+        })
+      } else {
+        toast.error("Registration failed", {
+          description: "Please check your input and try again.",
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -70,6 +101,19 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="userName">User Name</Label>
+              <Input
+                id="userName"
+                type="text"
+                placeholder="John Doe"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
