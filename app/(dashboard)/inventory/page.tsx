@@ -100,7 +100,7 @@ export default function InventoryPage() {
           }
 
           // Generate QR code data with package URL
-          const qrData = `http://localhost:3000/package/${item.uid}`
+          const qrData = `${window.location.origin}/package/${item.uid}`
 
           // Generate QR code as data URL
           const qrCodeUrl = await QRCode.toDataURL(qrData, {

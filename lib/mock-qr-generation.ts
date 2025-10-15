@@ -51,7 +51,7 @@ export async function mockGenerateQRCodes(itemUids: string[]): Promise<GenerateQ
         })
       } else {
         // Generate QR code containing package URL
-        const qrData = `http://localhost:3000/package/${itemUid}`
+        const qrData = `${window.location.origin}/package/${itemUid}`
 
         const qrCodeUrl = await generateQRCodeDataURL(qrData)
 
@@ -87,7 +87,7 @@ export async function mockGenerateQRCodes(itemUids: string[]): Promise<GenerateQ
  * Mock function to generate QR code for single item (for testing)
  */
 export async function mockGenerateSingleQR(itemUid: string): Promise<string> {
-  const qrData = `http://localhost:3000/package/${itemUid}`
+  const qrData = `${window.location.origin}/package/${itemUid}`
 
   return await generateQRCodeDataURL(qrData)
 }

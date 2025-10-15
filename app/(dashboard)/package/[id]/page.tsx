@@ -319,7 +319,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
               <p className="font-medium">This page can be accessed via QR code scan</p>
               <p className="text-sm text-muted-foreground">
                 Scan URL: <code className="bg-background px-2 py-1 rounded text-xs">
-                  http://localhost:3000/package/{id}
+                  {`${window.location.origin}/package/${id}`}
                 </code>
               </p>
             </div>
