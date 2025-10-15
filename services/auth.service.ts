@@ -12,20 +12,16 @@ import type {
     LoginResponse,
     TokenCheckResponse,
 } from "../types/auth.types";
-import type {
-    SuccessResponse,
-    ApiResponse,
-    ApiResponseDemo,
-} from "../types/response.types";
+import type { SuccessResponse, ApiResponse } from "../types/response.types";
 
 async function postApi<TRequest, TResponse = unknown>(
     url: string,
     data?: TRequest
 ) {
-    const resp = await axiosClient.post<ApiResponseDemo<TResponse>>(url, data);
+    const resp = await axiosClient.post<ApiResponse<TResponse>>(url, data);
     // axiosClient interceptor returns the raw axios response; the project uses ApiResponse wrapper
     if (resp && resp.data && resp.status >= 200 && resp.status < 300) {
-        return resp.data as ApiResponseDemo<TResponse>;
+        return resp.data as ApiResponse<TResponse>;
     }
     // Try to surface message when possible
     const msg = getMessageFromResponse(resp) || "API request failed";

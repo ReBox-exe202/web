@@ -266,7 +266,7 @@ export default function QRScanner() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Click "Start Camera" to begin scanning QR codes, or upload an image from your device.
+            Click &#34;Start Camera&#34; to begin scanning QR codes, or upload an image from your device.
           </AlertDescription>
         </Alert>
       )}
