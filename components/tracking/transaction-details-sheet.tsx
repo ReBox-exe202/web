@@ -51,7 +51,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange }: Tra
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Transaction Details</SheetTitle>
-          <SheetDescription>Complete lifecycle information for {transaction.itemUid}</SheetDescription>
+          <SheetDescription>Complete lifecycle information for {transaction.itemId}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
@@ -78,7 +78,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange }: Tra
 
             <div>
               <p className="text-sm text-muted-foreground">Item UID</p>
-              <p className="font-mono font-medium">{transaction.itemUid}</p>
+              <p className="font-mono font-medium">{transaction.itemId}</p>
             </div>
 
             <div>

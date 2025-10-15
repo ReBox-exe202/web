@@ -75,7 +75,7 @@ export function DataTable<TData, TValue>({ columns, data, namespace, onExportCSV
           .filter(key => newSelection[key])
           .map(index => {
             const row = table.getRowModel().rows[parseInt(index)]
-            return (row?.original as any)?.uid || ""
+            return (row?.original as any)?.id || ""
           })
           .filter(Boolean)
         onRowSelectionChange(selectedCount, selectedIds)

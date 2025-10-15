@@ -15,7 +15,7 @@ import { format } from "date-fns"
 export default function ReturnsPage() {
   const [qrInput, setQrInput] = useState("")
   const [scannedItem, setScannedItem] = useState<{
-    uid: string
+    id: string
     type: string
     size: string
     transaction?: {
@@ -45,7 +45,7 @@ export default function ReturnsPage() {
     }
 
     // Find item in mock data
-    const item = mockItems.find((i) => i.uid === qrInput.trim())
+    const item = mockItems.find((i) => i.id === qrInput.trim())
     if (!item) {
       toast.error("Item not found", {
         description: "The scanned item UID does not exist in the system.",
@@ -54,10 +54,10 @@ export default function ReturnsPage() {
     }
 
     // Find active transaction
-    const transaction = mockTransactions.find((t) => t.itemUid === item.uid && t.status === "Borrowed")
+    const transaction = mockTransactions.find((t) => t.itemId === item.id && t.status === "Borrowed")
 
     setScannedItem({
-      uid: item.uid,
+      id: item.id,
       type: item.type,
       size: item.size,
       transaction: transaction
@@ -75,7 +75,7 @@ export default function ReturnsPage() {
     if (!scannedItem) return
 
     toast.success("Return confirmed", {
-      description: `${scannedItem.uid} has been marked as returned${needsSanitizing ? " and flagged for sanitizing" : ""}.`,
+      description: `${scannedItem.id} has been marked as returned${needsSanitizing ? " and flagged for sanitizing" : ""}.`,
     })
 
     // Reset form
@@ -130,7 +130,7 @@ export default function ReturnsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Item UID</p>
-                    <p className="font-mono font-bold text-lg">{scannedItem.uid}</p>
+                    <p className="font-mono font-bold text-lg">{scannedItem.id}</p>
                   </div>
                   <Badge
                     variant="secondary"
@@ -225,7 +225,7 @@ export default function ReturnsPage() {
                         <Package className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-mono font-medium text-sm">{transaction.itemUid}</p>
+                        <p className="font-mono font-medium text-sm">{transaction.itemId}</p>
                         <p className="text-xs text-muted-foreground">{transaction.borrowerAnonId}</p>
                       </div>
                     </div>

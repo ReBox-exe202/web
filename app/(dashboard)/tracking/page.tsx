@@ -53,7 +53,7 @@ export default function TrackingPage() {
     const headers = ["ID", "Item UID", "Borrower", "Partner", "Status", "Borrowed At", "Due At", "Returned At", "Notes"]
     const csvData = filteredData.map((t) => [
       t.id,
-      t.itemUid,
+      t.itemId,
       t.borrowerAnonId,
       t.partnerId,
       t.status,

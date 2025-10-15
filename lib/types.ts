@@ -15,7 +15,7 @@ export type ItemSize = "S" | "M" | "L"
 export type ItemStatus = "Active" | "Sanitizing" | "Retired"
 
 export interface Item {
-  uid: string
+  id: string
   type: ItemType
   size: ItemSize
   cycles: number
@@ -28,7 +28,7 @@ export type TransactionStatus = "Borrowed" | "Returned" | "Overdue" | "Lost" | "
 
 export interface Transaction {
   id: string
-  itemUid: string
+  itemId: string
   partnerId: string
   borrowerAnonId: string
   status: TransactionStatus

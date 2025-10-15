@@ -13,7 +13,7 @@ export default function PackagePage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const filteredItems = mockItems.filter((item) =>
-    item.uid.toLowerCase().includes(searchQuery.toLowerCase())
+    item.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const statusColors = {
@@ -85,12 +85,12 @@ export default function PackagePage() {
         <CardContent>
           <div className="space-y-3">
             {filteredItems.map((item) => (
-              <Link key={item.uid} href={`/package/${item.uid}`}>
+              <Link key={item.id} href={`/package/${item.id}`}>
                 <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
                   <div className="flex items-center gap-4">
                     <Package className="h-8 w-8 text-muted-foreground" />
                     <div>
-                      <p className="font-mono font-bold">{item.uid}</p>
+                      <p className="font-mono font-bold">{item.id}</p>
                       <p className="text-sm text-muted-foreground">
                         {item.type} - {item.size} - {item.cycles} cycles
                       </p>
