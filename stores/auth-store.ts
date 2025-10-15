@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import AuthService from "@/lib/api/services/auth.service";
+import AuthService from "@/services/auth.service";
 import type { LoginRequest } from "@/types/auth.types";
 import type { Account } from "@/types/user.types";
 import { AccountRole } from "@/types/user.types";
