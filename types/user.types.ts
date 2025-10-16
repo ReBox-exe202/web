@@ -25,17 +25,6 @@ export interface NavigationItem {
 export type NavigationByRole = Record<AccountRole, NavigationItem[]>;
 
 /**
- * Navigation item
- */
-export interface NavigationItem {
-  name: string;
-  href: string;
-  icon: React.ElementType;
-}
-
-export type NavigationByRole = Record<AccountRole, NavigationItem[]>;
-
-/**
  * Account status
  */
 export enum AccountStatus {
