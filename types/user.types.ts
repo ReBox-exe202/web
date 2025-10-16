@@ -13,16 +13,6 @@ export enum AccountRole {
     CONSUMER = "consumer",
     GUEST = "guest",
 }
-/**
- * Navigation item
- */
-export interface NavigationItem {
-  name: string;
-  href: string;
-  icon: React.ElementType;
-}
-
-export type NavigationByRole = Record<AccountRole, NavigationItem[]>;
 
 /**
  * Navigation item
