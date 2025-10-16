@@ -1,28 +1,81 @@
 "use client"
 
-import { use } from "react"
+import { use, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Package, MapPin, Calendar, TrendingUp, User, QrCode, ShoppingBag, RotateCcw, ShoppingCart } from "lucide-react"
+import { ArrowLeft, Package, MapPin, Calendar, TrendingUp, User, QrCode, ShoppingBag, RotateCcw, ShoppingCart, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { mockItems } from "@/lib/mock-data"
 import { format } from "date-fns"
 import Image from "next/image"
 import { toast } from "sonner"
 import { useState } from "react"
+import { useAuthStore } from "@/stores/auth-store"
+import { AuthDialog } from "@/components/auth/auth-dialog"
+import { useSearchParams } from "next/navigation"
 
 export default function PackageDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
+  const searchParams = useSearchParams()
+
+  // Get auth state from Zustand
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const user = useAuthStore((state) => state.user)
+
+  // State for auth dialog
+  const [showAuthDialog, setShowAuthDialog] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
   const packageItem = mockItems.find((item) => item.id === id)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const authRequired = searchParams.get("auth") === "required"
+
+    if (authRequired && !isAuthenticated) {
+      setShowAuthDialog(true)
+      setIsCheckingAuth(false)
+    } else if (isAuthenticated) {
+      setShowAuthDialog(false)
+      setIsCheckingAuth(false)
+    } else {
+      // If no auth query param and not authenticated, still show dialog
+      // This handles direct navigation without middleware
+      setShowAuthDialog(true)
+      setIsCheckingAuth(false)
+    }
+  }, [searchParams, isAuthenticated])
+
+  // Show auth dialog if not authenticated
+  if (showAuthDialog && !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/50">
+        <AuthDialog
+          open={showAuthDialog}
+          onOpenChange={setShowAuthDialog}
+          redirectUrl={`/package/${id}`}
+        />
+      </div>
+    )
+  }
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   const handleBorrow = async () => {
     setIsProcessing(true)
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       toast.success("Package Borrowed", {
         description: `Successfully borrowed ${packageItem?.id}. Please return within 7 days.`,
       })
@@ -40,7 +93,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       toast.success("Package Returned", {
         description: `Successfully returned ${packageItem?.id}. Thank you!`,
       })
@@ -114,9 +167,9 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
+            <Button
+              variant="default"
+              size="sm"
               className="bg-green-600 hover:bg-green-700"
               onClick={handleBorrow}
               disabled={isProcessing}
@@ -124,9 +177,9 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
               <ShoppingCart className="mr-2 h-4 w-4" />
               {isProcessing ? "Processing..." : "Borrow"}
             </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
+            <Button
+              variant="default"
+              size="sm"
               className="bg-blue-600 hover:bg-blue-700"
               onClick={handleReturn}
               disabled={isProcessing}
@@ -237,7 +290,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">UID</p>
+                  <p className="text-sm font-medium text-muted-foreground">ID</p>
                   <p className="text-lg font-mono font-bold">{packageItem.id}</p>
                 </div>
                 <div>

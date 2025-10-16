@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, Search, Bell, Moon, Sun, LogOut } from "lucide-react"
+import { Menu, Search, Bell, Moon, Sun, LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUIStore } from "@/stores/theme-store"
@@ -11,6 +11,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
@@ -21,6 +23,8 @@ export function Topbar() {
   const logout = useAuthStore((state) => state.logout)
   const router = useRouter()
 
+  console.log("User in topbar:", user)
+
   const handleLogout = async () => {
     await logout()
     toast.success("Logged out", {
@@ -30,7 +34,7 @@ export function Topbar() {
   }
 
   const displayName =
-    user?.username || user?.fullName || `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || user?.email || "User"
+    user?.userName || user?.fullName || `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || user?.email || "User"
 
   const initials = displayName
     .split(" ")
@@ -76,7 +80,16 @@ export function Topbar() {
               </Avatar>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{displayName}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.userName || user?.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
               Logout

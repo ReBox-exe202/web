@@ -10,7 +10,7 @@
 export interface TokenCheckResponse {
     id: string;
     email: string;
-    username: string;
+    userName: string;
     role: string;
     firstName?: string;
     lastName?: string;
@@ -68,9 +68,10 @@ export interface RefreshTokenRequest {
  * Refresh token response
  */
 export interface RefreshTokenResponse {
-    token: string;
+    acccesToken: string;
     refreshToken: string;
-    expired: string;
+    expiredAt: string;
+    role: string;
 }
 
 /**
@@ -79,11 +80,11 @@ export interface RefreshTokenResponse {
 export interface AccountProfile {
     id: string;
     email: string;
-    username: string;
+    userName: string;
     firstName?: string;
     lastName?: string;
     avatar?: string;
-    role: string;
+    roles: string[];
     createdAt: string;
     updatedAt?: string;
 }

@@ -31,7 +31,7 @@ export function AccountMenu() {
   if (!user) return null
 
   const displayName =
-    user.username || user.fullName || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "User"
+    user.userName || user.fullName || `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email || "User"
 
   const initials = displayName
     .split(" ")
@@ -49,7 +49,7 @@ export function AccountMenu() {
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="hidden md:block text-left">
-            <p className="text-sm font-medium">{user.username || displayName}</p>
+            <p className="text-sm font-medium">{user.userName || displayName}</p>
             <Badge variant="secondary" className="text-xs">
               {user.role}
             </Badge>
@@ -59,7 +59,7 @@ export function AccountMenu() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user.username || displayName}</p>
+            <p className="text-sm font-medium">{user.userName || displayName}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
