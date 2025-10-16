@@ -50,7 +50,7 @@ export default function TrackingPage() {
   }
 
   const handleExportCSV = () => {
-    const headers = ["ID", "Item UID", "Borrower", "Partner", "Status", "Borrowed At", "Due At", "Returned At", "Notes"]
+    const headers = ["ID", "Item ID", "Borrower", "Partner", "Status", "Borrowed At", "Due At", "Returned At", "Notes"]
     const csvData = filteredData.map((t) => [
       t.id,
       t.itemId,

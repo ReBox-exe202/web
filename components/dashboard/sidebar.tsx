@@ -37,8 +37,8 @@ export const navigationByRole: NavigationByRole = {
 
 export function Sidebar() {
   const user = useAuthStore((state) => state.user);
-    const userRole = user?.role || AccountRole.GUEST;
-   const navigation = navigationByRole[userRole];
+  const userRole = user?.role || AccountRole.GUEST;
+  const navigation = navigationByRole[userRole];
 
   const pathname = usePathname()
   const sidebarOpen = useUIStore((state) => state.sidebarOpen)

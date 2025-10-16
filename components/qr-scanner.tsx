@@ -6,8 +6,7 @@ import jsQR from "jsqr";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { RefreshCw, CheckCircle2, XCircle, ScanLine, Info, Upload } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
+import { RefreshCw, CheckCircle2, XCircle, ScanLine, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export default function QRScanner() {
@@ -25,7 +24,6 @@ export default function QRScanner() {
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopScanning();
@@ -69,17 +67,11 @@ export default function QRScanner() {
       return;
     }
 
-    // Set canvas size to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Get image data
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Try to decode QR code
     const code = jsQR(imageData.data, imageData.width, imageData.height, {
       inversionAttempts: "dontInvert",
     });
@@ -89,7 +81,6 @@ export default function QRScanner() {
       return;
     }
 
-    // Continue scanning
     animationFrameRef.current = requestAnimationFrame(scanQRCode);
   };
 
@@ -108,15 +99,8 @@ export default function QRScanner() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-        
-        // Start scanning loop
         scanQRCode();
         setCameraPermission("granted");
-        
-        // Show scanning started notification
-        toast.info("Camera Started", {
-          description: "Point your camera at a QR code to scan"
-        });
       }
     } catch (err: any) {
       console.error("Error starting scanner:", err);
@@ -152,37 +136,18 @@ export default function QRScanner() {
     stopScanning();
     setScanning(false);
     
-    // Check if scanned data is a package URL
     if (data.includes('/package/')) {
-      // Extract package ID and navigate
       const match = data.match(/\/package\/([^/?#]+)/);
       if (match && match[1]) {
         const packageId = match[1];
-        
-        // Show success toast
-        toast.success("✅ QR Code Scanned!", {
-          description: `Redirecting to package ${packageId}...`,
-          duration: 2000,
-        });
-        
-        // Navigate after short delay for user to see success message
         setTimeout(() => {
           router.push(`/package/${packageId}`);
-        }, 1000);
-        
+        }, 500);
         return;
       }
     }
     
-    // If not a package URL, just show the content
-    toast.success("✅ QR Code Scanned!", {
-      description: data.startsWith('http') 
-        ? `URL: ${data}` 
-        : `Content: ${data.length > 60 ? data.substring(0, 60) + "..." : data}`,
-      duration: 5000,
-    });
-    
-    setTimeout(() => setDetected(false), 1500);
+    setTimeout(() => setDetected(false), 1000);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,9 +162,6 @@ export default function QRScanner() {
     }
 
     setIsProcessing(true);
-    toast.info("Processing image...", {
-      description: "Scanning QR code from uploaded image"
-    });
 
     try {
       const imageUrl = URL.createObjectURL(file);
@@ -223,7 +185,6 @@ export default function QRScanner() {
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         
         if (code && code.data) {
-          // Use handleScanSuccess to process the result (includes navigation logic)
           handleScanSuccess(code.data);
         } else {
           toast.error("No QR code found", {
@@ -262,15 +223,6 @@ export default function QRScanner() {
         <p className="text-muted-foreground mt-1">Scan QR codes to track and manage items</p>
       </div>
 
-      {!scanning && !result && cameraPermission === "prompt" && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Click "Start Camera" to begin scanning QR codes, or upload an image from your device.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <Card className="rounded-2xl shadow-sm">
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-center">
@@ -283,7 +235,7 @@ export default function QRScanner() {
             {detected && (
               <Badge className="gap-2 bg-green-600 hover:bg-green-700">
                 <CheckCircle2 className="h-3 w-3" />
-                QR Code Detected!
+                Detected!
               </Badge>
             )}
             {error && (
@@ -324,7 +276,6 @@ export default function QRScanner() {
                   />
                   <canvas ref={canvasRef} className="hidden" />
                   
-                  {/* Scanning Frame Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className={`relative w-64 h-64 transition-all duration-300 ${
                       detected ? "scale-105" : "scale-100"

@@ -62,26 +62,38 @@ export const useAuthStore = create<AuthState>()((set) => ({
             try {
                 const profile = await AuthService.getCurrentAccount();
                 // profile.role can be a string or an object. Normalize it to AccountRole
+                // if (typeof profile.roles === "string") {
+                //     const code = profile.roles.toLowerCase();
+                //     if (code.includes("admin")) role = AccountRole.ADMIN;
+                //     else if (code.includes("merchant"))
+                //         role = AccountRole.MERCHANT;
+                //     else if (code.includes("guest")) role = AccountRole.GUEST;
+                //     else role = AccountRole.CONSUMER;
+                // }
+                // else if (profile.roles && typeof profile.roles === "object") {
+                //     const maybe = (profile.roles as Record<string, unknown>)
+                //         .code;
+                //     if (typeof maybe === "string") {
+                //         const code = maybe.toLowerCase();
+                //         if (code === "admin" || code === "administrator")
+                //             role = AccountRole.ADMIN;
+                //         else if (code === "merchant")
+                //             role = AccountRole.MERCHANT;
+                //         else if (code === "guest") role = AccountRole.GUEST;
+                //         else role = AccountRole.CONSUMER;
+                //     }
+                // }
                 let role: Account["role"] = AccountRole.CONSUMER;
-                if (typeof profile.role === "string") {
-                    const code = profile.role.toLowerCase();
-                    if (code.includes("admin")) role = AccountRole.ADMIN;
-                    else if (code.includes("merchant"))
+                if (Array.isArray(profile.roles) && profile.roles.length > 0) {
+                    const code = profile.roles[0].toLowerCase();
+                    if (code === "admin" || code === "administrator")
+                        role = AccountRole.ADMIN;
+                    else if (code === "merchant")
                         role = AccountRole.MERCHANT;
-                    else if (code.includes("consumer")) role = AccountRole.CONSUMER;
-                    else role = AccountRole.GUEST;
-                } else if (profile.role && typeof profile.role === "object") {
-                    const maybe = (profile.role as Record<string, unknown>)
-                        .code;
-                    if (typeof maybe === "string") {
-                        const code = maybe.toLowerCase();
-                        if (code === "admin" || code === "administrator")
-                            role = AccountRole.ADMIN;
-                        else if (code === "merchant")
-                            role = AccountRole.MERCHANT;
-                        else if (code === "consumer") role = AccountRole.CONSUMER;
-                        else role = AccountRole.GUEST;
-                    }
+                    else if (code === "guest")
+                        role = AccountRole.GUEST;
+                    else
+                        role = AccountRole.CONSUMER;
                 }
 
                 const mapped: Account = {
@@ -144,71 +156,6 @@ export const useAuthStore = create<AuthState>()((set) => ({
             }
             // set in-memory token used by axios interceptor
             setToken(token);
-            try {
-                const profile = await AuthService.getCurrentAccount();
-                // profile.role can be a string or an object. Normalize it to AccountRole
-                let role: Account["role"] = AccountRole.CONSUMER;
-                if (typeof profile.role === "string") {
-                    const code = profile.role.toLowerCase();
-                    if (code.includes("admin")) role = AccountRole.ADMIN;
-                    else if (code.includes("merchant"))
-                        role = AccountRole.MERCHANT;
-                    else if (code.includes("guest")) role = AccountRole.GUEST;
-                    else role = AccountRole.CONSUMER;
-                } else if (profile.role && typeof profile.role === "object") {
-                    const maybe = (profile.role as Record<string, unknown>)
-                        .code;
-                    if (typeof maybe === "string") {
-                        const code = maybe.toLowerCase();
-                        if (code === "admin" || code === "administrator")
-                            role = AccountRole.ADMIN;
-                        else if (code === "merchant")
-                            role = AccountRole.MERCHANT;
-                        else if (code === "guest") role = AccountRole.GUEST;
-                        else role = AccountRole.CONSUMER;
-                    }
-                }
-
-                const mapped: Account = {
-                    id: String(profile.id),
-                    email: profile.email,
-                    userName: profile.userName || profile.email,
-                    firstName: profile.firstName,
-                    lastName: profile.lastName,
-                    fullName:
-                        profile.firstName && profile.lastName
-                            ? `${profile.firstName} ${profile.lastName}`
-                            : profile.userName || profile.email,
-                    avatar: profile.avatar,
-                    role,
-                    status: "active" as Account["status"],
-                    createdAt: profile.createdAt,
-                } as Account;
-                set({ user: mapped, token, isAuthenticated: true });
-                // persist full auth snapshot
-                if (typeof window !== "undefined") {
-                    try {
-                        localStorage.setItem(
-                            "auth-storage",
-                            JSON.stringify({
-                                user: mapped,
-                                token,
-                                isAuthenticated: true,
-                            })
-                        );
-                    } catch { }
-                }
-            } catch {
-                set({ token, isAuthenticated: true });
-                if (typeof window !== "undefined") {
-                    try {
-                        localStorage.setItem(
-                            "auth-storage",
-                            JSON.stringify({ token, isAuthenticated: true })
-                        );
-                    } catch { }
-                }
-            }
         } else {
             throw new Error("Invalid registration response");
         }
@@ -219,7 +166,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
         if (callApi) {
             try {
                 // backend revoke token
-                await AuthService.logout(); 
+                await AuthService.logout();
             } catch {
                 // ignore
             }

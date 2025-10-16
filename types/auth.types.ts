@@ -84,7 +84,7 @@ export interface AccountProfile {
     firstName?: string;
     lastName?: string;
     avatar?: string;
-    role: string;
+    roles: string[];
     createdAt: string;
     updatedAt?: string;
 }
