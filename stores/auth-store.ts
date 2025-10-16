@@ -37,8 +37,6 @@ interface AuthState {
     login: (credentials: LoginRequest) => Promise<void>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
-    signOut: () => void;
-    setUser: (user: Account | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()((set) => ({
@@ -57,7 +55,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch {}
+                } catch { }
             }
             // set in-memory token used by axios interceptor
             setToken(token);
@@ -70,8 +68,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
                     if (code.includes("admin")) role = AccountRole.ADMIN;
                     else if (code.includes("merchant"))
                         role = AccountRole.MERCHANT;
-                    else if (code.includes("guest")) role = AccountRole.GUEST;
-                    else role = AccountRole.CONSUMER;
+                    else if (code.includes("consumer")) role = AccountRole.CONSUMER;
+                    else role = AccountRole.GUEST;
                 } else if (profile.role && typeof profile.role === "object") {
                     const maybe = (profile.role as Record<string, unknown>)
                         .code;
@@ -81,21 +79,21 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             role = AccountRole.ADMIN;
                         else if (code === "merchant")
                             role = AccountRole.MERCHANT;
-                        else if (code === "guest") role = AccountRole.GUEST;
-                        else role = AccountRole.CONSUMER;
+                        else if (code === "consumer") role = AccountRole.CONSUMER;
+                        else role = AccountRole.GUEST;
                     }
                 }
 
                 const mapped: Account = {
                     id: String(profile.id),
                     email: profile.email,
-                    username: profile.username || profile.email,
+                    userName: profile.userName || profile.email,
                     firstName: profile.firstName,
                     lastName: profile.lastName,
                     fullName:
                         profile.firstName && profile.lastName
                             ? `${profile.firstName} ${profile.lastName}`
-                            : profile.username || profile.email,
+                            : profile.userName || profile.email,
                     avatar: profile.avatar,
                     role,
                     status: "active" as Account["status"],
@@ -113,7 +111,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                                 isAuthenticated: true,
                             })
                         );
-                    } catch {}
+                    } catch { }
                 }
             } catch {
                 set({ token, isAuthenticated: true });
@@ -123,7 +121,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             "auth-storage",
                             JSON.stringify({ token, isAuthenticated: true })
                         );
-                    } catch {}
+                    } catch { }
                 }
             }
         } else {
@@ -142,7 +140,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch {}
+                } catch { }
             }
             // set in-memory token used by axios interceptor
             setToken(token);
@@ -174,13 +172,13 @@ export const useAuthStore = create<AuthState>()((set) => ({
                 const mapped: Account = {
                     id: String(profile.id),
                     email: profile.email,
-                    username: profile.username || profile.email,
+                    userName: profile.userName || profile.email,
                     firstName: profile.firstName,
                     lastName: profile.lastName,
                     fullName:
                         profile.firstName && profile.lastName
                             ? `${profile.firstName} ${profile.lastName}`
-                            : profile.username || profile.email,
+                            : profile.userName || profile.email,
                     avatar: profile.avatar,
                     role,
                     status: "active" as Account["status"],
@@ -198,7 +196,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                                 isAuthenticated: true,
                             })
                         );
-                    } catch {}
+                    } catch { }
                 }
             } catch {
                 set({ token, isAuthenticated: true });
@@ -208,37 +206,39 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             "auth-storage",
                             JSON.stringify({ token, isAuthenticated: true })
                         );
-                    } catch {}
+                    } catch { }
                 }
             }
         } else {
             throw new Error("Invalid registration response");
         }
     },
-    logout: async () => {
-        try {
-            await AuthService.logout();
-        } catch {
-            // ignore
+    logout: async (options?: { redirect?: string; callApi?: boolean }) => {
+        const { redirect = "/login", callApi = false } = options || {};
+
+        if (callApi) {
+            try {
+                // backend revoke token
+                await AuthService.logout(); 
+            } catch {
+                // ignore
+            }
         }
+
         if (typeof window !== "undefined") {
             try {
                 localStorage.removeItem("auth-storage");
                 localStorage.removeItem("token");
-            } catch {}
+            } catch {
+                console.warn("Failed to clear localStorage on logout");
+            }
         }
+
         setToken(null);
         set({ user: null, token: null, isAuthenticated: false });
-    },
-    signOut: () => {
-        if (typeof window !== "undefined") {
-            try {
-                localStorage.removeItem("auth-storage");
-                localStorage.removeItem("token");
-            } catch {}
+
+        if (typeof window !== "undefined" && redirect) {
+            window.location.href = redirect;
         }
-        setToken(null);
-        set({ user: null, token: null, isAuthenticated: false });
-    },
-    setUser: (user: Account | null) => set({ user }),
+    }
 }));

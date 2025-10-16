@@ -11,8 +11,11 @@ import type {
     ResetPasswordRequest,
     LoginResponse,
     TokenCheckResponse,
-} from "../types/auth.types";
-import type { SuccessResponse, ApiResponse } from "../types/response.types";
+} from "@/types/auth.types";
+import type {
+    SuccessResponse,
+    ApiResponse,
+} from "@/types/response.types";
 
 async function postApi<TRequest, TResponse = unknown>(
     url: string,
@@ -70,7 +73,7 @@ const AuthService = {
 
     getCurrentAccount: async () => {
         const resp = await axiosClient.get<ApiResponse<AccountProfile>>(
-            "/profile"
+            "/accounts/me"
         );
         if (resp && resp.data && resp.data.success && resp.data.data) {
             return resp.data.data;
