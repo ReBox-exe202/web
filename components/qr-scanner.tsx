@@ -135,7 +135,7 @@ export default function QRScanner() {
 
     stopScanning();
     setScanning(false);
-
+    
     if (data.includes('/package/')) {
       const match = data.match(/\/package\/([^/?#]+)/);
       if (match && match[1]) {
@@ -146,7 +146,7 @@ export default function QRScanner() {
         return;
       }
     }
-
+    
     setTimeout(() => setDetected(false), 1000);
   };
 
@@ -275,7 +275,7 @@ export default function QRScanner() {
                     muted
                   />
                   <canvas ref={canvasRef} className="hidden" />
-
+                  
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className={`relative w-64 h-64 transition-all duration-300 ${detected ? "scale-105" : "scale-100"
                       }`}>
