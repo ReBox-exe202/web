@@ -6,8 +6,7 @@ import jsQR from "jsqr";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { RefreshCw, CheckCircle2, XCircle, ScanLine, Info, Upload } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
+import { RefreshCw, CheckCircle2, XCircle, ScanLine, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export default function QRScanner() {
@@ -17,7 +16,7 @@ export default function QRScanner() {
   const [detected, setDetected] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [cameraPermission, setCameraPermission] = useState<"prompt" | "granted" | "denied">("prompt");
-  
+
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,7 +24,6 @@ export default function QRScanner() {
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopScanning();
@@ -37,7 +35,7 @@ export default function QRScanner() {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -46,7 +44,7 @@ export default function QRScanner() {
 
   const handleReset = () => {
     stopScanning();
-    
+
     setResult("");
     setError("");
     setScanning(false);
@@ -69,17 +67,11 @@ export default function QRScanner() {
       return;
     }
 
-    // Set canvas size to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Get image data
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Try to decode QR code
     const code = jsQR(imageData.data, imageData.width, imageData.height, {
       inversionAttempts: "dontInvert",
     });
@@ -89,7 +81,6 @@ export default function QRScanner() {
       return;
     }
 
-    // Continue scanning
     animationFrameRef.current = requestAnimationFrame(scanQRCode);
   };
 
@@ -108,20 +99,13 @@ export default function QRScanner() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-        
-        // Start scanning loop
         scanQRCode();
         setCameraPermission("granted");
-        
-        // Show scanning started notification
-        toast.info("Camera Started", {
-          description: "Point your camera at a QR code to scan"
-        });
       }
     } catch (err: any) {
       console.error("Error starting scanner:", err);
       const errorMessage = err?.message || "";
-      
+
       if (err?.name === "NotAllowedError" || errorMessage.includes("Permission")) {
         setError("Camera permission denied. Please allow access and try again.");
         setCameraPermission("denied");
@@ -139,7 +123,7 @@ export default function QRScanner() {
           description: "Failed to access camera. Please check permissions."
         });
       }
-      
+
       setScanning(false);
     }
   };
@@ -148,41 +132,22 @@ export default function QRScanner() {
     setResult(data);
     setDetected(true);
     setError("");
-    
+
     stopScanning();
     setScanning(false);
-    
-    // Check if scanned data is a package URL
+
     if (data.includes('/package/')) {
-      // Extract package ID and navigate
       const match = data.match(/\/package\/([^/?#]+)/);
       if (match && match[1]) {
         const packageId = match[1];
-        
-        // Show success toast
-        toast.success("✅ QR Code Scanned!", {
-          description: `Redirecting to package ${packageId}...`,
-          duration: 2000,
-        });
-        
-        // Navigate after short delay for user to see success message
         setTimeout(() => {
           router.push(`/package/${packageId}`);
-        }, 1000);
-        
+        }, 500);
         return;
       }
     }
-    
-    // If not a package URL, just show the content
-    toast.success("✅ QR Code Scanned!", {
-      description: data.startsWith('http') 
-        ? `URL: ${data}` 
-        : `Content: ${data.length > 60 ? data.substring(0, 60) + "..." : data}`,
-      duration: 5000,
-    });
-    
-    setTimeout(() => setDetected(false), 1500);
+
+    setTimeout(() => setDetected(false), 1000);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,18 +162,15 @@ export default function QRScanner() {
     }
 
     setIsProcessing(true);
-    toast.info("Processing image...", {
-      description: "Scanning QR code from uploaded image"
-    });
 
     try {
       const imageUrl = URL.createObjectURL(file);
       const img = new Image();
-      
+
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        
+
         if (!ctx) {
           toast.error("Failed to process image");
           setIsProcessing(false);
@@ -218,19 +180,18 @@ export default function QRScanner() {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
-        
+
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height);
-        
+
         if (code && code.data) {
-          // Use handleScanSuccess to process the result (includes navigation logic)
           handleScanSuccess(code.data);
         } else {
           toast.error("No QR code found", {
             description: "Please make sure the image contains a clear QR code"
           });
         }
-        
+
         setIsProcessing(false);
         URL.revokeObjectURL(imageUrl);
       };
@@ -262,15 +223,6 @@ export default function QRScanner() {
         <p className="text-muted-foreground mt-1">Scan QR codes to track and manage items</p>
       </div>
 
-      {!scanning && !result && cameraPermission === "prompt" && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Click &#34;Start Camera&#34; to begin scanning QR codes, or upload an image from your device.
-          </AlertDescription>
-        </Alert>
-      )}
-
       <Card className="rounded-2xl shadow-sm">
         <CardContent className="p-6">
           <div className="mb-4 flex items-center justify-center">
@@ -283,7 +235,7 @@ export default function QRScanner() {
             {detected && (
               <Badge className="gap-2 bg-green-600 hover:bg-green-700">
                 <CheckCircle2 className="h-3 w-3" />
-                QR Code Detected!
+                Detected!
               </Badge>
             )}
             {error && (
@@ -323,27 +275,21 @@ export default function QRScanner() {
                     muted
                   />
                   <canvas ref={canvasRef} className="hidden" />
-                  
-                  {/* Scanning Frame Overlay */}
+
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className={`relative w-64 h-64 transition-all duration-300 ${
-                      detected ? "scale-105" : "scale-100"
-                    }`}>
-                      <div className={`absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 rounded-tl-2xl transition-colors duration-300 ${
-                        detected ? "border-green-500" : "border-primary"
-                      }`} />
-                      
-                      <div className={`absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 rounded-tr-2xl transition-colors duration-300 ${
-                        detected ? "border-green-500" : "border-primary"
-                      }`} />
-                      
-                      <div className={`absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 rounded-bl-2xl transition-colors duration-300 ${
-                        detected ? "border-green-500" : "border-primary"
-                      }`} />
-                      
-                      <div className={`absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 rounded-br-2xl transition-colors duration-300 ${
-                        detected ? "border-green-500" : "border-primary"
-                      }`} />
+                    <div className={`relative w-64 h-64 transition-all duration-300 ${detected ? "scale-105" : "scale-100"
+                      }`}>
+                      <div className={`absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 rounded-tl-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
+                        }`} />
+
+                      <div className={`absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 rounded-tr-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
+                        }`} />
+
+                      <div className={`absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 rounded-bl-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
+                        }`} />
+
+                      <div className={`absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 rounded-br-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
+                        }`} />
 
                       {!detected && (
                         <div className="absolute inset-0 overflow-hidden">
@@ -367,8 +313,8 @@ export default function QRScanner() {
                 <div className="w-full h-full flex flex-col items-center justify-center p-8">
                   <XCircle className="w-16 h-16 text-destructive mb-4" />
                   <p className="text-destructive text-center mb-4">{error}</p>
-                  <Button 
-                    onClick={handleReset} 
+                  <Button
+                    onClick={handleReset}
                     variant="outline"
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
@@ -391,7 +337,7 @@ export default function QRScanner() {
               <span className="text-xs text-muted-foreground uppercase">Or</span>
               <div className="flex-1 border-t"></div>
             </div>
-            
+
             <input
               ref={fileInputRef}
               type="file"
@@ -400,7 +346,7 @@ export default function QRScanner() {
               className="hidden"
               id="qr-image-upload"
             />
-            
+
             <div className="flex justify-center">
               <Button
                 variant="outline"
@@ -421,7 +367,7 @@ export default function QRScanner() {
                 )}
               </Button>
             </div>
-            
+
             <p className="text-xs text-center text-muted-foreground mt-2">
               Select an image containing a QR code from your device
             </p>
@@ -446,16 +392,16 @@ export default function QRScanner() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex gap-2">
-              <Button 
-                onClick={handleReset} 
+              <Button
+                onClick={handleReset}
                 className="flex-1"
               >
                 <ScanLine className="w-4 h-4 mr-2" />
                 Scan Another
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => {
                   navigator.clipboard.writeText(result);
