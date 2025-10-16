@@ -71,17 +71,6 @@ const AuthService = {
         return result.data;
     },
 
-    getCurrentAccount: async () => {
-        const resp = await axiosClient.get<ApiResponse<AccountProfile>>(
-            "/accounts/me"
-        );
-        if (resp && resp.data && resp.data.success && resp.data.data) {
-            return resp.data.data;
-        }
-        throw new Error(
-            getMessageFromResponse(resp) || "Failed to fetch profile"
-        );
-    },
 
     updateProfile: async (data: Partial<AccountProfile>) => {
         const resp = await axiosClient.put<ApiResponse<AccountProfile>>(

@@ -4,6 +4,7 @@ import type { LoginRequest, RegisterRequest } from "@/types/auth.types";
 import type { Account } from "@/types/user.types";
 import { AccountRole } from "@/types/user.types";
 import { setToken } from "@/lib/token";
+import { accountApi } from "@/services/account.service";
 
 // Manual rehydrate from localStorage 'auth-storage'
 let initialUser: Account | null = null;
@@ -55,12 +56,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch { }
+                } catch {}
             }
             // set in-memory token used by axios interceptor
             setToken(token);
             try {
-                const profile = await AuthService.getCurrentAccount();
+                const profile = await accountApi.getMe();
                 // profile.role can be a string or an object. Normalize it to AccountRole
                 // if (typeof profile.roles === "string") {
                 //     const code = profile.roles.toLowerCase();
@@ -83,17 +84,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
                 //         else role = AccountRole.CONSUMER;
                 //     }
                 // }
-                let role: Account["role"] = AccountRole.CONSUMER;
+                let roles: Account["role"] = AccountRole.CONSUMER;
                 if (Array.isArray(profile.roles) && profile.roles.length > 0) {
-                    const code = profile.roles[0].toLowerCase();
-                    if (code === "admin" || code === "administrator")
-                        role = AccountRole.ADMIN;
-                    else if (code === "merchant")
-                        role = AccountRole.MERCHANT;
-                    else if (code === "guest")
-                        role = AccountRole.GUEST;
-                    else
-                        role = AccountRole.CONSUMER;
+                    const role = profile.roles[0].toLowerCase();
+                    if (role === "admin" || role === "administrator")
+                        roles = AccountRole.ADMIN;
+                    else if (role === "merchant") roles = AccountRole.MERCHANT;
+                    else if (role === "guest") roles = AccountRole.GUEST;
+                    else roles = AccountRole.CONSUMER;
                 }
 
                 const mapped: Account = {
@@ -107,7 +105,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             ? `${profile.firstName} ${profile.lastName}`
                             : profile.userName || profile.email,
                     avatar: profile.avatar,
-                    role,
+                    role: roles,
                     status: "active" as Account["status"],
                     createdAt: profile.createdAt,
                 } as Account;
@@ -123,7 +121,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                                 isAuthenticated: true,
                             })
                         );
-                    } catch { }
+                    } catch {}
                 }
             } catch {
                 set({ token, isAuthenticated: true });
@@ -133,7 +131,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             "auth-storage",
                             JSON.stringify({ token, isAuthenticated: true })
                         );
-                    } catch { }
+                    } catch {}
                 }
             }
         } else {
@@ -152,7 +150,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch { }
+                } catch {}
             }
             // set in-memory token used by axios interceptor
             setToken(token);
@@ -187,5 +185,5 @@ export const useAuthStore = create<AuthState>()((set) => ({
         if (typeof window !== "undefined" && redirect) {
             window.location.href = redirect;
         }
-    }
+    },
 }));
