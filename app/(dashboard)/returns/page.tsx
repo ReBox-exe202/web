@@ -39,7 +39,7 @@ export default function ReturnsPage() {
   const handleScan = () => {
     if (!qrInput.trim()) {
       toast.error("Invalid input", {
-        description: "Please enter an item UID or scan a QR code.",
+        description: "Please enter an item ID or scan a QR code.",
       })
       return
     }
@@ -48,7 +48,7 @@ export default function ReturnsPage() {
     const item = mockItems.find((i) => i.id === qrInput.trim())
     if (!item) {
       toast.error("Item not found", {
-        description: "The scanned item UID does not exist in the system.",
+        description: "The scanned item ID does not exist in the system.",
       })
       return
     }
@@ -97,11 +97,11 @@ export default function ReturnsPage() {
         <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle>Scan Item</CardTitle>
-            <CardDescription>Enter item UID or scan QR code to process return</CardDescription>
+            <CardDescription>Enter item ID or scan QR code to process return</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="qr-input">Item UID / QR Code</Label>
+              <Label htmlFor="qr-input">Item ID / QR Code</Label>
               <div className="flex gap-2">
                 <Input
                   id="qr-input"
@@ -129,7 +129,7 @@ export default function ReturnsPage() {
               <div className="mt-6 space-y-4 p-4 border rounded-lg bg-accent/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Item UID</p>
+                    <p className="text-sm text-muted-foreground">Item ID</p>
                     <p className="font-mono font-bold text-lg">{scannedItem.id}</p>
                   </div>
                   <Badge

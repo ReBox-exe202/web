@@ -290,7 +290,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">UID</p>
+                  <p className="text-sm font-medium text-muted-foreground">ID</p>
                   <p className="text-lg font-mono font-bold">{packageItem.id}</p>
                 </div>
                 <div>

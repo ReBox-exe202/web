@@ -77,7 +77,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange }: Tra
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Item UID</p>
+              <p className="text-sm text-muted-foreground">Item ID</p>
               <p className="font-mono font-medium">{transaction.itemId}</p>
             </div>
 
