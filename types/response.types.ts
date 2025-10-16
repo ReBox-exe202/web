@@ -16,12 +16,6 @@ export interface ApiResponse<T = unknown> {
     success: boolean;
 }
 
-export interface ApiResponse<T = unknown> {
-    data: T;
-    message: string;
-    success: boolean;
-}
-
 export interface ApiResponseDemo<T = unknown> {
     data: T;
     message: string;

@@ -7,23 +7,38 @@ import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Setti
 import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/stores/theme-store"
 import { useEffect } from "react"
+import { useAuthStore } from "@/stores/auth-store"
+import { AccountRole, NavigationByRole } from "@/types/user.types"
 
-const navigation = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Tracking", href: "/tracking", icon: MapPin },
-  { name: "Projects", href: "/projects", icon: FolderKanban },
-  { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Partners", href: "/partners", icon: Users },
-  { name: "Returns", href: "/returns", icon: RotateCcw },
-  { name: "QR", href: "/qr", icon: QrCode },
-  { name: "Package", href: "/package", icon: Package },
-  { name: "Settings", href: "/settings", icon: Settings },
-]
+export const navigationByRole: NavigationByRole = {
+  [AccountRole.ADMIN]: [
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Tracking", href: "/tracking", icon: MapPin },
+    { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Inventory", href: "/inventory", icon: Package },
+    { name: "Partners", href: "/partners", icon: Users },
+    { name: "Returns", href: "/returns", icon: RotateCcw },
+    { name: "QR", href: "/qr", icon: QrCode },
+    { name: "Package", href: "/package", icon: Package },
+    { name: "Settings", href: "/settings", icon: Settings },
+  ],
+  [AccountRole.MERCHANT]: [
+    { name: "Inventory", href: "/inventory", icon: Package },
+    { name: "Package", href: "/package", icon: Package },
+    { name: "QR", href: "/qr", icon: QrCode },
+  ],
+  [AccountRole.CONSUMER]: [
+    { name: "Inventory", href: "/inventory", icon: Package },
+    { name: "Package", href: "/package", icon: Package },
+    { name: "QR", href: "/qr", icon: QrCode },
+  ],
+  [AccountRole.GUEST]: [],
+}
 
 export function Sidebar() {
-  // const user = useAuthStore((state) => state.user);
-  //   const userRole = user?.role || AccountRole.GUEST;
-  //   const navigation = getNavigationByRole(userRole);
+  const user = useAuthStore((state) => state.user);
+    const userRole = user?.role || AccountRole.GUEST;
+   const navigation = navigationByRole[userRole];
 
   const pathname = usePathname()
   const sidebarOpen = useUIStore((state) => state.sidebarOpen)
