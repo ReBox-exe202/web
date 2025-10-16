@@ -12,10 +12,7 @@ import type {
     LoginResponse,
     TokenCheckResponse,
 } from "@/types/auth.types";
-import type {
-    SuccessResponse,
-    ApiResponse,
-} from "@/types/response.types";
+import type { SuccessResponse, ApiResponse } from "@/types/response.types";
 
 async function postApi<TRequest, TResponse = unknown>(
     url: string,
