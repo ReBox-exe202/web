@@ -56,7 +56,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch {}
+                } catch { }
             }
             // set in-memory token used by axios interceptor
             setToken(token);
@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                                 isAuthenticated: true,
                             })
                         );
-                    } catch {}
+                    } catch { }
                 }
             } catch {
                 set({ token, isAuthenticated: true });
@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             "auth-storage",
                             JSON.stringify({ token, isAuthenticated: true })
                         );
-                    } catch {}
+                    } catch { }
                 }
             }
         } else {
@@ -150,7 +150,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch {}
+                } catch { }
             }
             // set in-memory token used by axios interceptor
             setToken(token);
