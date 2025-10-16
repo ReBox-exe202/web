@@ -15,6 +15,17 @@ export enum AccountRole {
 }
 
 /**
+ * Navigation item
+ */
+export interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
+
+export type NavigationByRole = Record<AccountRole, NavigationItem[]>;
+
+/**
  * Account status
  */
 export enum AccountStatus {
@@ -30,7 +41,7 @@ export enum AccountStatus {
 export interface Account {
     id: string;
     email: string;
-    username: string;
+    userName: string;
     firstName?: string;
     lastName?: string;
     fullName?: string;
@@ -50,7 +61,7 @@ export interface Account {
  */
 export interface CreateAccountRequest {
     email: string;
-    username: string;
+    userName: string;
     password: string;
     firstName?: string;
     lastName?: string;
