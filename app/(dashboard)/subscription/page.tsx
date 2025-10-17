@@ -103,9 +103,8 @@ export default function SubscriptionPage() {
           return (
             <Card
               key={plan.name}
-              className={`relative rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col ${
-                plan.popular ? "ring-2 ring-primary scale-105 shadow-xl" : ""
-              }`}
+              className={`relative rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col ${plan.popular ? "ring-2 ring-primary scale-105 shadow-xl" : ""
+                }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -200,7 +199,7 @@ export default function SubscriptionPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                We'll notify you when you're approaching your limits. You can either upgrade your plan or purchase
+                We&apos;ll notify you when you&apos;re approaching your limits. You can either upgrade your plan or purchase
                 additional capacity as needed.
               </p>
             </CardContent>
