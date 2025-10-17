@@ -13,6 +13,7 @@ export enum AccountRole {
     CONSUMER = "consumer",
     GUEST = "guest",
 }
+
 /**
  * Navigation item
  */
