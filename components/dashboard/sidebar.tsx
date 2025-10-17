@@ -3,7 +3,19 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Settings, Leaf, QrCode, X } from "lucide-react"
+import {
+  LayoutDashboard,
+  MapPin,
+  FolderKanban,
+  Package,
+  Users,
+  RotateCcw,
+  Settings,
+  Leaf,
+  QrCode,
+  X,
+  CreditCard
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/stores/theme-store"
 import { useEffect } from "react"
@@ -15,6 +27,7 @@ export const navigationByRole: NavigationByRole = {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Tracking", href: "/tracking", icon: MapPin },
     { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Subscription", href: "/subscription", icon: CreditCard },
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Partners", href: "/partners", icon: Users },
     { name: "Returns", href: "/returns", icon: RotateCcw },

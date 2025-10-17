@@ -56,7 +56,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
-                } catch { }
+                } catch {  }
             }
             // set in-memory token used by axios interceptor
             setToken(token);
