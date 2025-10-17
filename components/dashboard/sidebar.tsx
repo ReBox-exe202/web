@@ -3,18 +3,20 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Settings, Leaf, QrCode, X } from "lucide-react"
+import { LayoutDashboard, MapPin, FolderKanban, Package, Users, RotateCcw, Settings, Leaf, QrCode, X, SubscriptIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/stores/theme-store"
 import { useEffect } from "react"
 import { useAuthStore } from "@/stores/auth-store"
 import { AccountRole, NavigationByRole } from "@/types/user.types"
+import { Sub } from "@radix-ui/react-dropdown-menu"
 
 export const navigationByRole: NavigationByRole = {
   [AccountRole.ADMIN]: [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Tracking", href: "/tracking", icon: MapPin },
     { name: "Projects", href: "/projects", icon: FolderKanban },
+    { name: "Subscriptions", href: "/subscriptions", icon: SubscriptIcon },
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Partners", href: "/partners", icon: Users },
     { name: "Returns", href: "/returns", icon: RotateCcw },
