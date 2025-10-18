@@ -1,9 +1,9 @@
 import { usePayOS, PayOSConfig } from "payos-checkout";
 
-const payOSConfig: PayOSConfig = {
-  RETURN_URL: "", // required
-  ELEMENT_ID: "", // required
-  CHECKOUT_URL: "", // required
+export const payOSConfig: PayOSConfig = {
+  RETURN_URL: process.env.RETURN_URL ?? "",
+  ELEMENT_ID: process.env.ELEMENT_ID ?? "",
+  CHECKOUT_URL: process.env.CHECKOUT_URL ?? "",
   embedded: true, // Nếu dùng giao diện nhúng
   onSuccess: (event: any) => {
     //TODO: Hành động sau khi người dùng thanh toán đơn hàng thành công
