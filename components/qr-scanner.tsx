@@ -44,7 +44,7 @@ export default function QRScanner() {
     toast.success("QR Code Scanned!", {
       description: "Processing QR code data..."
     });
-    
+
     if (data.includes('/package/')) {
       const match = data.match(/\/package\/([^/?#]+)/);
       if (match && match[1]) {
@@ -55,7 +55,7 @@ export default function QRScanner() {
         return;
       }
     }
-    
+
     setTimeout(() => setDetected(false), 1000);
   };
 
@@ -218,7 +218,7 @@ export default function QRScanner() {
                       },
                     }}
                   />
-                  
+
                   {detected && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20">
                       <div className="w-20 h-20 rounded-full bg-green-500/30 flex items-center justify-center animate-ping">
@@ -267,11 +267,12 @@ export default function QRScanner() {
 
             <input
               ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="hidden"
               id="qr-image-upload"
+              aria-label="Upload QR code image"
+              className="hidden"
+              type="file"
+              onChange={handleFileUpload}
+              accept="image/*"
             />
 
             <div className="flex justify-center">
