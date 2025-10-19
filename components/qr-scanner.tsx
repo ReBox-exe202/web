@@ -89,21 +89,50 @@ export default function QRScanner() {
     setScanning(true);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API not supported in this browser");
+      }
+
+      console.log("Requesting camera access...");
+      
+      // Try with different constraints for better mobile compatibility
+      const constraints = {
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
         audio: false,
-      });
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Camera access granted, stream obtained:", stream);
 
       streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        scanQRCode();
-        setCameraPermission("granted");
+        
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
+          videoRef.current?.play().then(() => {
+            console.log("Video playing, starting scan loop");
+            setCameraPermission("granted");
+            scanQRCode();
+          }).catch((playErr) => {
+            console.error("Error playing video:", playErr);
+            setError("Failed to start video playback");
+            setScanning(false);
+          });
+        };
       }
     } catch (err: any) {
       console.error("Error starting scanner:", err);
+      console.error("Error name:", err?.name);
+      console.error("Error message:", err?.message);
+      
       const errorMessage = err?.message || "";
 
       if (err?.name === "NotAllowedError" || errorMessage.includes("Permission")) {
@@ -117,10 +146,20 @@ export default function QRScanner() {
         toast.error("No Camera Found", {
           description: "Please connect a camera or use the upload option"
         });
+      } else if (err?.name === "NotReadableError") {
+        setError("Camera is already in use by another application.");
+        toast.error("Camera In Use", {
+          description: "Please close other apps using the camera"
+        });
+      } else if (errorMessage.includes("not supported")) {
+        setError("Camera API not supported. Please use the upload option.");
+        toast.error("Not Supported", {
+          description: "Your browser doesn't support camera access"
+        });
       } else {
         setError("Failed to start camera. Please try again or use upload option.");
         toast.error("Camera Error", {
-          description: "Failed to access camera. Please check permissions."
+          description: err?.message || "Failed to access camera. Please check permissions."
         });
       }
 
