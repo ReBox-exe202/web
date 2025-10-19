@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import jsQR from "jsqr";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
@@ -15,127 +16,35 @@ export default function QRScanner() {
   const [scanning, setScanning] = useState<boolean>(false);
   const [detected, setDetected] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [cameraPermission, setCameraPermission] = useState<"prompt" | "granted" | "denied">("prompt");
 
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      stopScanning();
-    };
-  }, []);
-
-  const stopScanning = () => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-  };
 
   const handleReset = () => {
-    stopScanning();
-
     setResult("");
     setError("");
     setScanning(false);
     setDetected(false);
     setIsProcessing(false);
-    setCameraPermission("prompt");
   };
 
-  const scanQRCode = () => {
-    if (!videoRef.current || !canvasRef.current || !scanning) {
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-
-    if (!context || video.readyState !== video.HAVE_ENOUGH_DATA) {
-      animationFrameRef.current = requestAnimationFrame(scanQRCode);
-      return;
-    }
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-      inversionAttempts: "dontInvert",
-    });
-
-    if (code && code.data) {
-      handleScanSuccess(code.data);
-      return;
-    }
-
-    animationFrameRef.current = requestAnimationFrame(scanQRCode);
-  };
-
-  const handleStartScanning = async () => {
+  const handleStartScanning = () => {
     setError("");
+    setResult("");
     setScanning(true);
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        scanQRCode();
-        setCameraPermission("granted");
-      }
-    } catch (err: any) {
-      console.error("Error starting scanner:", err);
-      const errorMessage = err?.message || "";
-
-      if (err?.name === "NotAllowedError" || errorMessage.includes("Permission")) {
-        setError("Camera permission denied. Please allow access and try again.");
-        setCameraPermission("denied");
-        toast.error("Permission Denied", {
-          description: "Camera access is required to scan QR codes"
-        });
-      } else if (err?.name === "NotFoundError" || errorMessage.includes("No camera")) {
-        setError("No camera found. Please use the upload option instead.");
-        toast.error("No Camera Found", {
-          description: "Please connect a camera or use the upload option"
-        });
-      } else {
-        setError("Failed to start camera. Please try again or use upload option.");
-        toast.error("Camera Error", {
-          description: "Failed to access camera. Please check permissions."
-        });
-      }
-
-      setScanning(false);
-    }
   };
 
   const handleScanSuccess = (data: string) => {
+    console.log("QR Code detected:", data);
     setResult(data);
     setDetected(true);
     setError("");
-
-    stopScanning();
     setScanning(false);
-    
+
+    toast.success("QR Code Scanned!", {
+      description: "Processing QR code data..."
+    });
+
     if (data.includes('/package/')) {
       const match = data.match(/\/package\/([^/?#]+)/);
       if (match && match[1]) {
@@ -146,8 +55,17 @@ export default function QRScanner() {
         return;
       }
     }
-    
+
     setTimeout(() => setDetected(false), 1000);
+  };
+
+  const handleScanError = (error: unknown) => {
+    console.error("QR Scanner error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to scan QR code";
+    setError(errorMessage);
+    toast.error("Scanner Error", {
+      description: errorMessage
+    });
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,44 +186,46 @@ export default function QRScanner() {
 
               {scanning && !error && (
                 <div className="relative w-full h-full">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    playsInline
-                    muted
+                  <Scanner
+                    onScan={(detectedCodes) => {
+                      if (detectedCodes && detectedCodes.length > 0) {
+                        const code = detectedCodes[0];
+                        if (code.rawValue) {
+                          handleScanSuccess(code.rawValue);
+                        }
+                      }
+                    }}
+                    onError={handleScanError}
+                    constraints={{
+                      facingMode: "environment",
+                      aspectRatio: 1,
+                    }}
+                    components={{
+                      onOff: false,
+                      torch: true,
+                      zoom: false,
+                      finder: true,
+                    }}
+                    styles={{
+                      container: {
+                        width: "100%",
+                        height: "100%",
+                      },
+                      video: {
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      },
+                    }}
                   />
-                  <canvas ref={canvasRef} className="hidden" />
-                  
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className={`relative w-64 h-64 transition-all duration-300 ${detected ? "scale-105" : "scale-100"
-                      }`}>
-                      <div className={`absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 rounded-tl-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
-                        }`} />
 
-                      <div className={`absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 rounded-tr-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
-                        }`} />
-
-                      <div className={`absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 rounded-bl-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
-                        }`} />
-
-                      <div className={`absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 rounded-br-2xl transition-colors duration-300 ${detected ? "border-green-500" : "border-primary"
-                        }`} />
-
-                      {!detected && (
-                        <div className="absolute inset-0 overflow-hidden">
-                          <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-scan" />
-                        </div>
-                      )}
-
-                      {detected && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center animate-ping">
-                            <CheckCircle2 className="w-10 h-10 text-green-500" />
-                          </div>
-                        </div>
-                      )}
+                  {detected && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20">
+                      <div className="w-20 h-20 rounded-full bg-green-500/30 flex items-center justify-center animate-ping">
+                        <CheckCircle2 className="w-10 h-10 text-green-500" />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -326,9 +246,16 @@ export default function QRScanner() {
           </div>
 
           {scanning && !result && !error && (
-            <p className="text-center text-muted-foreground text-sm mt-4">
-              Position the QR code inside the frame
-            </p>
+            <div className="mt-4 flex justify-center gap-2">
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                size="sm"
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Stop Camera
+              </Button>
+            </div>
           )}
 
           <div className="mt-4 pt-4 border-t">
@@ -340,11 +267,12 @@ export default function QRScanner() {
 
             <input
               ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="hidden"
               id="qr-image-upload"
+              aria-label="Upload QR code image"
+              className="hidden"
+              type="file"
+              onChange={handleFileUpload}
+              accept="image/*"
             />
 
             <div className="flex justify-center">

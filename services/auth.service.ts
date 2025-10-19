@@ -68,7 +68,6 @@ const AuthService = {
         return result.data;
     },
 
-
     updateProfile: async (data: Partial<AccountProfile>) => {
         const resp = await axiosClient.put<ApiResponse<AccountProfile>>(
             "/profile",

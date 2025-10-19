@@ -23,8 +23,6 @@ export function Topbar() {
   const logout = useAuthStore((state) => state.logout)
   const router = useRouter()
 
-  console.log("User in topbar:", user)
-
   const handleLogout = async () => {
     await logout()
     toast.success("Logged out", {
