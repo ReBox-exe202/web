@@ -65,7 +65,7 @@ export function AuthDialog({ open, onOpenChange, redirectUrl }: AuthDialogProps)
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          After signing in, you'll be redirected back to this package
+          After signing in, you&apos;ll be redirected back to this package
         </p>
       </DialogContent>
     </Dialog>

@@ -7,7 +7,7 @@ const axiosClient = axios.create({
         "Content-Type": "application/json",
     },
     maxRedirects: 5,
-    // withCredentials: true,
+    withCredentials: true,
 });
 
 axiosClient.interceptors.request.use(
