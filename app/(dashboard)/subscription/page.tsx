@@ -1,12 +1,13 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, Package, Users, Building2, Sparkles } from "lucide-react"
-import { toast } from "sonner"
 
 export default function SubscriptionPage() {
+  const router = useRouter()
   const plans = [
     {
       name: "Starter",
@@ -78,9 +79,7 @@ export default function SubscriptionPage() {
   ]
 
   const handleSelectPlan = (planName: string) => {
-    toast.success("Plan Selected", {
-      description: `You've selected the ${planName} plan. Redirecting to checkout...`,
-    })
+    router.push(`/checkout?plan=${planName}`)
   }
 
   return (
@@ -103,12 +102,15 @@ export default function SubscriptionPage() {
           return (
             <Card
               key={plan.name}
-              className={`relative rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col ${plan.popular ? "ring-2 ring-primary scale-105 shadow-xl" : ""
-                }`}
+              className={`group relative rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col hover:-translate-y-2 hover:scale-105 animate-in fade-in zoom-in cursor-pointer ${
+                plan.popular 
+                  ? "ring-2 ring-primary scale-105 shadow-xl hover:ring-4" 
+                  : "hover:ring-2 hover:ring-primary/50"
+              }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 animate-bounce">
+                  <Badge className="bg-primary text-primary-foreground px-4 py-1 shadow-lg">
                     Most Popular
                   </Badge>
                 </div>
@@ -116,8 +118,8 @@ export default function SubscriptionPage() {
 
               <CardHeader className="space-y-4 pb-6">
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300 group-hover:scale-110 group-hover:rotate-6 transform">
+                    <Icon className="h-6 w-6 text-primary group-hover:scale-125 transition-transform duration-300" />
                   </div>
                   {plan.popular && (
                     <Badge variant="secondary" className="text-xs">
@@ -126,11 +128,15 @@ export default function SubscriptionPage() {
                   )}
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                  <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors duration-300">
+                    {plan.name}
+                  </CardTitle>
                   <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
                 </div>
                 <div className="flex items-end gap-2">
-                  <span className="text-5xl font-bold">${plan.price}</span>
+                  <span className="text-5xl font-bold group-hover:scale-110 transition-transform duration-300 inline-block">
+                    ${plan.price}
+                  </span>
                   <span className="text-muted-foreground mb-2">/{plan.period}</span>
                 </div>
               </CardHeader>
@@ -166,11 +172,12 @@ export default function SubscriptionPage() {
               <div className="p-6 pt-0 mt-auto">
                 <Button
                   onClick={() => handleSelectPlan(plan.name)}
-                  className="w-full"
+                  className="w-full group-hover:scale-105 transition-transform duration-300 group-hover:shadow-xl"
                   variant={plan.popular ? "default" : "outline"}
                   size="lg"
                 >
-                  Get Started
+                  <span className="group-hover:mr-2 transition-all duration-300">Get Started</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
                 </Button>
               </div>
             </Card>
