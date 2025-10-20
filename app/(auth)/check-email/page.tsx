@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Loader2, CheckCircle, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
-import { emailVerificationService } from "@/services/email-verification.service"
 import { useAuthStore } from "@/stores/auth-store"
+import AuthService from "@/services/auth.service"
 
 export default function CheckEmailPage() {
   const searchParams = useSearchParams()
@@ -37,7 +37,7 @@ export default function CheckEmailPage() {
 
     setIsResending(true)
     try {
-      await emailVerificationService.sendConfirmationEmail(email)
+      await AuthService.sendVerificationEmail(email)
       toast.success("Email sent!", {
         description: "Please check your inbox and spam folder.",
       })

@@ -116,16 +116,17 @@ const AuthService = {
         return result.data;
     },
 
-    verifyEmail: async (token: string) => {
-        const result = await postApi<void, SuccessResponse>(
-            `/verify-email/${token}`
+    verifyEmail: async (userId: string, token: string) => {
+        const result = await postApi<{}, SuccessResponse>(
+            `auth/verify-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`,
+            {}
         );
         return result.data;
     },
 
-    resendVerificationEmail: async (email: string) => {
+    sendVerificationEmail: async (email: string) => {
         const result = await postApi<{ email: string }, SuccessResponse>(
-            "/resend-verification",
+            "/auth/send-confirm-email",
             { email }
         );
         return result.data;

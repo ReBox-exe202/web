@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { emailVerificationService } from "@/services/email-verification.service"
+import AuthService from "@/services/auth.service"
 
 function VerifyEmailContent() {
   const router = useRouter()
@@ -17,11 +17,6 @@ function VerifyEmailContent() {
     const userId = searchParams.get("userId")
     const token = searchParams.get("token")
 
-    console.log("=== Email Verification Debug ===")
-    console.log("userId:", userId)
-    console.log("token (raw):", token)
-    console.log("token length:", token?.length)
-
     if (!userId || !token) {
       setStatus("error")
       setMessage("Invalid verification link. Please check your email and try again.")
@@ -32,14 +27,8 @@ function VerifyEmailContent() {
   }, [searchParams])
 
   const verifyEmail = async (userId: string, token: string) => {
-    console.log("=== Calling verifyEmail API ===")
-    console.log("API userId:", userId)
-    console.log("API token:", token)
-    
     try {
-      const response = await emailVerificationService.verifyEmail(userId, token)
-      console.log("API response:", response)
-      
+      const response = await AuthService.verifyEmail(userId, token)
       if (response.success) {
         setStatus("success")
         setMessage("Your email has been verified successfully! You can now use all features of your account.")
@@ -48,9 +37,6 @@ function VerifyEmailContent() {
         setMessage(response.message || "Verification failed. The link may have expired. Please request a new verification email.")
       }
     } catch (error: any) {
-      console.error("=== API Error ===", error)
-      console.error("Error response:", error.response?.data)
-      
       setStatus("error")
       const errorMessage = error.response?.data?.message || error.message || "An error occurred during verification."
       setMessage(errorMessage)
