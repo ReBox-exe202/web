@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Leaf, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuthStore } from "@/stores/auth-store"
-import { emailVerificationService } from "@/services/email-verification.service"
+import AuthService from "@/services/auth.service"
 
 export default function RegisterPage() {
   const [userName, setUserName] = useState("")
@@ -48,7 +48,7 @@ export default function RegisterPage() {
       
       // Step 2: Send email verification (don't block on failure)
       try {
-        await emailVerificationService.sendConfirmationEmail(email)
+        await AuthService.sendVerificationEmail(email)
         toast.success("Account created!", {
           description: "Please check your email to verify your account.",
         })
