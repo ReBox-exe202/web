@@ -35,7 +35,10 @@ axiosClient.interceptors.response.use(
                 const currentPath =
                     window.location.pathname + window.location.search;
                 // Don't redirect to login if on verify-email page or already on login page
-                if (currentPath !== "/login" && !currentPath.startsWith("/verify-email")) {
+                if (
+                    currentPath !== "/login" &&
+                    !currentPath.startsWith("/verify-email")
+                ) {
                     window.location.href = `/login?returnUrl=${encodeURIComponent(
                         currentPath
                     )}`;

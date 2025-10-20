@@ -131,3 +131,8 @@ export interface ResetPasswordRequest {
     newPassword: string;
     confirmPassword: string;
 }
+
+export interface VerifyEmailRequest {
+    userId: string;
+    token: string;
+}
