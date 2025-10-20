@@ -19,6 +19,23 @@ export interface TokenCheckResponse {
 }
 
 /**
+ * LoginGoogle request payload
+ */
+export interface LoginGoogleRequest {
+    idToken: string;
+}
+
+/**
+ * LoginGoogle response
+ */
+export interface LoginGoogleResponse {
+    role: string;
+    expiresAt: string;
+    accessToken: string;
+    refreshToken?: string;
+}
+
+/**
  * Login request payload
  */
 export interface LoginRequest {
@@ -30,7 +47,7 @@ export interface LoginRequest {
  * Login response
  */
 export interface LoginResponse {
-    status: string;
+    role: string;
     expiresAt: string;
     accessToken: string;
     refreshToken?: string;
