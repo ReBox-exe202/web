@@ -102,6 +102,7 @@ export interface AccountProfile {
     lastName?: string;
     avatar?: string;
     roles: string[];
+    emailConfirmed?: boolean;
     createdAt: string;
     updatedAt?: string;
 }
@@ -129,4 +130,9 @@ export interface ResetPasswordRequest {
     token: string;
     newPassword: string;
     confirmPassword: string;
+}
+
+export interface VerifyEmailRequest {
+    userId: string;
+    token: string;
 }

@@ -13,6 +13,7 @@ import type {
     TokenCheckResponse,
     LoginGoogleRequest,
     LoginGoogleResponse,
+    VerifyEmailRequest,
 } from "@/types/auth.types";
 import type { SuccessResponse, ApiResponse } from "@/types/response.types";
 
@@ -52,7 +53,7 @@ const AuthService = {
 
     loginGoogle: async (credentials: LoginGoogleRequest) => {
         const result = await postApi<LoginGoogleRequest, LoginGoogleResponse>(
-            "auth/google",  
+            "auth/google",
             credentials
         );
         return result.data;
@@ -115,16 +116,17 @@ const AuthService = {
         return result.data;
     },
 
-    verifyEmail: async (token: string) => {
-        const result = await postApi<void, SuccessResponse>(
-            `/verify-email/${token}`
+    verifyEmail: async (data: VerifyEmailRequest) => {
+        const result = await postApi<VerifyEmailRequest, SuccessResponse>(
+            "auth/verify-email",
+            data
         );
-        return result.data;
+        return result;
     },
 
-    resendVerificationEmail: async (email: string) => {
+    sendVerificationEmail: async (email: string) => {
         const result = await postApi<{ email: string }, SuccessResponse>(
-            "/resend-verification",
+            "/auth/send-confirm-email",
             { email }
         );
         return result.data;

@@ -34,12 +34,14 @@ axiosClient.interceptors.response.use(
             if (error.response.status === 401) {
                 const currentPath =
                     window.location.pathname + window.location.search;
-                if (currentPath !== "/login") {
+                // Don't redirect to login if on verify-email page or already on login page
+                if (
+                    currentPath !== "/login" &&
+                    !currentPath.startsWith("/verify-email")
+                ) {
                     window.location.href = `/login?returnUrl=${encodeURIComponent(
                         currentPath
                     )}`;
-                } else {
-                    window.location.href = "/login";
                 }
             }
             if (error.response.status === 403) {

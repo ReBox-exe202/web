@@ -142,18 +142,87 @@ export const useAuthStore = create<AuthState>()((set) => ({
         const response = await AuthService.register(data);
         if (response && response.accessToken) {
             const token = response.accessToken;
-            // persist token and auth snapshot to localStorage so it survives reloads
+            
+            // Persist token to localStorage
             if (typeof window !== "undefined") {
                 try {
-                    // will be overwritten later with full profile
                     localStorage.setItem(
                         "auth-storage",
                         JSON.stringify({ token, isAuthenticated: true })
                     );
                 } catch { }
             }
-            // set in-memory token used by axios interceptor
+            
+            // Set in-memory token for axios
             setToken(token);
+            
+            // Fetch user profile and update state (same as login)
+            try {
+                const profile = await accountApi.getMe();
+                
+                // Map roles
+                let role: Account["role"] = AccountRole.CONSUMER;
+                if (Array.isArray(profile.roles) && profile.roles.length > 0) {
+                    const roleStr = profile.roles[0].toLowerCase();
+                    if (roleStr === "admin" || roleStr === "administrator") {
+                        role = AccountRole.ADMIN;
+                    } else if (roleStr === "merchant") {
+                        role = AccountRole.MERCHANT;
+                    } else if (roleStr === "guest") {
+                        role = AccountRole.GUEST;
+                    } else {
+                        role = AccountRole.CONSUMER;
+                    }
+                }
+                
+                // Create user object
+                const mapped: Account = {
+                    id: String(profile.id),
+                    email: profile.email,
+                    userName: profile.userName || profile.email,
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                    fullName:
+                        profile.firstName && profile.lastName
+                            ? `${profile.firstName} ${profile.lastName}`
+                            : profile.userName || profile.email,
+                    avatar: profile.avatar,
+                    role: role,
+                    status: "active" as Account["status"],
+                    createdAt: profile.createdAt,
+                    emailConfirmed: profile.emailConfirmed || false,
+                } as Account;
+                
+                // Update state with user object
+                set({ user: mapped, token, isAuthenticated: true });
+                
+                // Persist full auth snapshot
+                if (typeof window !== "undefined") {
+                    try {
+                        localStorage.setItem(
+                            "auth-storage",
+                            JSON.stringify({
+                                user: mapped,
+                                token,
+                                isAuthenticated: true,
+                            })
+                        );
+                    } catch { }
+                }
+            } catch (profileError) {
+                console.error("Failed to fetch profile after registration:", profileError);
+                // If profile fetch fails, still set authenticated with token only
+                set({ token, isAuthenticated: true });
+                
+                if (typeof window !== "undefined") {
+                    try {
+                        localStorage.setItem(
+                            "auth-storage",
+                            JSON.stringify({ token, isAuthenticated: true })
+                        );
+                    } catch { }
+                }
+            }
         } else {
             throw new Error("Invalid registration response");
         }

@@ -1,6 +1,6 @@
 import axiosClient from "@/config/axios.config";
-import { ApiResponse } from "./apiResponse";
 import { AccountProfile } from "@/types/auth.types";
+import { ApiResponse } from "@/types/response.types";
 
 export const accountApi = {
     getMe: async (): Promise<AccountProfile> => {
