@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Leaf, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuthStore } from "@/stores/auth-store"
+import { emailVerificationService } from "@/services/email-verification.service"
 
 export default function RegisterPage() {
   const [userName, setUserName] = useState("")
@@ -42,20 +43,25 @@ export default function RegisterPage() {
 
     setIsLoading(true)
     try {
+      // Step 1: Register user
       await register({ userName, fullName, email, phone, password })
-      toast.success("Welcome aboard!", {
-        description: "Your account has been created successfully. Redirecting...",
-      })
       
-      // Redirect based on user role after registration
-      setTimeout(() => {
-        const userRole = useAuthStore.getState().user?.role
-        if (userRole === "admin") {
-          router.push("/admin")
-        } else {
-          router.push("/projects")
-        }
-      }, 1000)
+      // Step 2: Send email verification (don't block on failure)
+      try {
+        await emailVerificationService.sendConfirmationEmail(email)
+        toast.success("Account created!", {
+          description: "Please check your email to verify your account.",
+        })
+      } catch (emailError) {
+        // Log error but don't fail the registration
+        console.error("Failed to send verification email:", emailError)
+        toast.warning("Account created!", {
+          description: "We'll send you a verification email shortly.",
+        })
+      }
+      
+      // Step 3: Redirect to check-email page
+      router.push(`/check-email?email=${encodeURIComponent(email)}`)
     } catch (error: any) {
       // Handle API validation errors
       if (error?.response?.data?.errors) {

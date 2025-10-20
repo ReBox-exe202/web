@@ -102,6 +102,7 @@ export interface AccountProfile {
     lastName?: string;
     avatar?: string;
     roles: string[];
+    emailConfirmed?: boolean;
     createdAt: string;
     updatedAt?: string;
 }

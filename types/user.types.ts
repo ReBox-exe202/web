@@ -50,6 +50,7 @@ export interface Account {
     phone?: string;
     department?: string;
     position?: string;
+    emailConfirmed?: boolean;
     lastLoginAt?: string;
     createdAt: string;
     updatedAt?: string;
