@@ -11,6 +11,8 @@ import type {
     ResetPasswordRequest,
     LoginResponse,
     TokenCheckResponse,
+    LoginGoogleRequest,
+    LoginGoogleResponse,
 } from "@/types/auth.types";
 import type { SuccessResponse, ApiResponse } from "@/types/response.types";
 
@@ -43,6 +45,14 @@ const AuthService = {
     login: async (credentials: LoginRequest) => {
         const result = await postApi<LoginRequest, LoginResponse>(
             "auth/login",
+            credentials
+        );
+        return result.data;
+    },
+
+    loginGoogle: async (credentials: LoginGoogleRequest) => {
+        const result = await postApi<LoginGoogleRequest, LoginGoogleResponse>(
+            "auth/google",  
             credentials
         );
         return result.data;
