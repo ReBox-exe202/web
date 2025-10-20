@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Leaf, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { GoogleLoginButton } from "@/components/auth/google-login-button"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -126,6 +127,15 @@ export default function LoginPage() {
                 "Sign In"
               )}
             </Button>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+            <GoogleLoginButton className="w-full" disabled={isLoading} />
           </form>
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p className="mb-2">Demo accounts:</p>
