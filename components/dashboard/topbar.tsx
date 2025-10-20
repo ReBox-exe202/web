@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu, Search, Bell, Moon, Sun, LogOut, User } from "lucide-react"
+import { Menu, Search, Bell, Moon, Sun, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUIStore } from "@/stores/theme-store"
@@ -73,7 +73,7 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <button className="rounded-full transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={displayName} />
+                <AvatarImage src={user?.profilePictureUrl || "/placeholder.svg"} alt={displayName} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </button>

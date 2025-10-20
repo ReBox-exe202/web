@@ -105,6 +105,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                             ? `${profile.firstName} ${profile.lastName}`
                             : profile.userName || profile.email,
                     avatar: profile.avatar,
+                    profilePictureUrl: profile.profilePictureUrl,
                     role: roles,
                     status: "active" as Account["status"],
                     createdAt: profile.createdAt,

@@ -138,11 +138,6 @@ export default function LoginPage() {
             <GoogleLoginButton className="w-full" disabled={isLoading} />
           </form>
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p className="mb-2">Demo accounts:</p>
-            <div className="space-y-1 text-xs">
-              <p>Admin: administrator@localhost</p>
-              <p>pwd: Administrator1!</p>
-            </div>
             Already have an account?{" "}
             <Button
               type="button"
