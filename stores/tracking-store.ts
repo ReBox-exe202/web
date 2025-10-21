@@ -7,8 +7,8 @@ interface TrackingState {
   setTransactions: (transactions: Transaction[]) => void
   updateTransaction: (id: string, updates: Partial<Transaction>) => void
   markReturned: (id: string) => void
-  markLost: (id: string) => void
-  markSanitizing: (id: string) => void
+  markDamaged: (id: string) => void
+  markWashing: (id: string) => void
 }
 
 export const useTrackingStore = create<TrackingState>((set) => ({
@@ -24,12 +24,12 @@ export const useTrackingStore = create<TrackingState>((set) => ({
         t.id === id ? { ...t, status: "Returned", returnedAt: new Date() } : t,
       ),
     })),
-  markLost: (id) =>
+  markDamaged: (id) =>
     set((state) => ({
-      transactions: state.transactions.map((t) => (t.id === id ? { ...t, status: "Lost" } : t)),
+      transactions: state.transactions.map((t) => (t.id === id ? { ...t, status: "Damaged" } : t)),
     })),
-  markSanitizing: (id) =>
+  markWashing: (id) =>
     set((state) => ({
-      transactions: state.transactions.map((t) => (t.id === id ? { ...t, status: "Sanitizing" } : t)),
+      transactions: state.transactions.map((t) => (t.id === id ? { ...t, status: "Washing" } : t)),
     })),
 }))

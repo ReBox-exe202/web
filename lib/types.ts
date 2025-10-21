@@ -12,7 +12,7 @@ export interface Account {
 
 export type ItemType = "cup" | "box" | "bowl"
 export type ItemSize = "S" | "M" | "L"
-export type ItemStatus = "Ready" | "Borrowed" | "Returned" | "Washing" | "Damaged" | "Retired" 
+export type ItemStatus = "Ready" | "Borrowed" | "Returned" | "Washing" | "Damaged" | "Retired"
 
 export interface Item {
   id: string
@@ -24,7 +24,7 @@ export interface Item {
   createdAt: Date
 }
 
-export type TransactionStatus = "Borrowed" | "Returned" | "Overdue" | "Lost" | "Sanitizing"
+export type TransactionStatus = "Ready" | "Borrowed" | "Returned" | "Washing" | "Damaged" | "Retired"
 
 export interface Transaction {
   id: string

@@ -38,7 +38,7 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange }: Tra
     },
     {
       label: "Sanitized",
-      completed: transaction.status === "Sanitizing",
+      completed: transaction.status === "Washing",
     },
     {
       label: "Ready for Reuse",
@@ -66,10 +66,12 @@ export function TransactionDetailsSheet({ transaction, open, onOpenChange }: Tra
                 variant="secondary"
                 className={
                   transaction.status === "Returned"
-                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                    : transaction.status === "Overdue"
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                    : transaction.status === "Damaged"
                       ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                      : ""
+                      : transaction.status === "Washing"
+                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                        : ""
                 }
               >
                 {transaction.status}

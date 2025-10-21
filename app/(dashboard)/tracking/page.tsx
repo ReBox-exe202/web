@@ -15,8 +15,8 @@ import { toast } from "sonner"
 export default function TrackingPage() {
   const transactions = useTrackingStore((state) => state.transactions)
   const markReturned = useTrackingStore((state) => state.markReturned)
-  const markLost = useTrackingStore((state) => state.markLost)
-  const markSanitizing = useTrackingStore((state) => state.markSanitizing)
+  const markDamaged = useTrackingStore((state) => state.markDamaged)
+  const markWashing = useTrackingStore((state) => state.markWashing)
 
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -35,17 +35,17 @@ export default function TrackingPage() {
     })
   }
 
-  const handleMarkLost = (id: string) => {
-    markLost(id)
-    toast.error("Item marked as lost", {
+  const handleMarkDamaged = (id: string) => {
+    markDamaged(id)
+    toast.error("Item marked as damaged", {
       description: "The transaction has been updated.",
     })
   }
 
-  const handleMarkSanitizing = (id: string) => {
-    markSanitizing(id)
-    toast.success("Item marked for sanitizing", {
-      description: "The item will be sanitized before reuse.",
+  const handleMarkWashing = (id: string) => {
+    markWashing(id)
+    toast.success("Item marked for washing", {
+      description: "The item will be washed before reuse.",
     })
   }
 
@@ -85,7 +85,7 @@ export default function TrackingPage() {
     }
   }
 
-  const columns = createColumns(handleViewDetails, handleMarkReturned, handleMarkLost, handleMarkSanitizing)
+  const columns = createColumns(handleViewDetails, handleMarkReturned, handleMarkDamaged, handleMarkWashing)
 
   return (
     <div className="space-y-6">
@@ -106,11 +106,12 @@ export default function TrackingPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Ready">Ready</SelectItem>
                 <SelectItem value="Borrowed">Borrowed</SelectItem>
                 <SelectItem value="Returned">Returned</SelectItem>
-                <SelectItem value="Overdue">Overdue</SelectItem>
-                <SelectItem value="Lost">Lost</SelectItem>
-                <SelectItem value="Sanitizing">Sanitizing</SelectItem>
+                <SelectItem value="Washing">Washing</SelectItem>
+                <SelectItem value="Damaged">Damaged</SelectItem>
+                <SelectItem value="Retired">Retired</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" onClick={() => handleStatusFilterChange("all")}>

@@ -25,7 +25,7 @@ export default function ReturnsPage() {
       borrower: string
     }
   } | null>(null)
-  const [needsSanitizing, setNeedsSanitizing] = useState(false)
+  const [needsWashing, setNeedsWashing] = useState(false)
 
   const recentReturns = mockTransactions
     .filter((t) => t.status === "Returned")
@@ -75,13 +75,13 @@ export default function ReturnsPage() {
     if (!scannedItem) return
 
     toast.success("Return confirmed", {
-      description: `${scannedItem.id} has been marked as returned${needsSanitizing ? " and flagged for sanitizing" : ""}.`,
+      description: `${scannedItem.id} has been marked as returned${needsWashing ? " and flagged for washing" : ""}.`,
     })
 
     // Reset form
     setScannedItem(null)
     setQrInput("")
-    setNeedsSanitizing(false)
+    setNeedsWashing(false)
   }
 
   return (
@@ -189,12 +189,12 @@ export default function ReturnsPage() {
 
                 <div className="flex items-center space-x-2 pt-3 border-t">
                   <Checkbox
-                    id="sanitize"
-                    checked={needsSanitizing}
-                    onCheckedChange={(checked) => setNeedsSanitizing(checked as boolean)}
+                    id="washing"
+                    checked={needsWashing}
+                    onCheckedChange={(checked) => setNeedsWashing(checked as boolean)}
                   />
-                  <Label htmlFor="sanitize" className="text-sm font-normal cursor-pointer">
-                    Mark for sanitizing
+                  <Label htmlFor="washing" className="text-sm font-normal cursor-pointer">
+                    Mark for washing
                   </Label>
                 </div>
 

@@ -28,8 +28,8 @@ const statusColors = {
 export const createColumns = (
   onViewDetails: (transaction: Transaction) => void,
   onMarkReturned: (id: string) => void,
-  onMarkLost: (id: string) => void,
-  onMarkSanitizing: (id: string) => void,
+  onMarkDamaged: (id: string) => void,
+  onMarkWashing: (id: string) => void,
 ): ColumnDef<Transaction>[] => [
   {
     id: "select",
@@ -181,16 +181,16 @@ export const createColumns = (
                 Mark Returned
               </DropdownMenuItem>
             )}
-            {transaction.status !== "Lost" && (
-              <DropdownMenuItem onClick={() => onMarkLost(transaction.id)} className="text-destructive">
+            {transaction.status !== "Damaged" && transaction.status !== "Retired" && (
+              <DropdownMenuItem onClick={() => onMarkDamaged(transaction.id)} className="text-destructive">
                 <XCircle className="mr-2 h-4 w-4" />
-                Mark Lost
+                Mark Damaged
               </DropdownMenuItem>
             )}
             {transaction.status === "Returned" && (
-              <DropdownMenuItem onClick={() => onMarkSanitizing(transaction.id)}>
+              <DropdownMenuItem onClick={() => onMarkWashing(transaction.id)}>
                 <Droplet className="mr-2 h-4 w-4" />
-                Mark Sanitizing
+                Mark Washing
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

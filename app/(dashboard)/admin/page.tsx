@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   const totalReturned = mockTransactions.filter((t) => t.status === "Returned").length
   const returnRate = totalReturned > 0 ? ((returnedOnTime / totalReturned) * 100).toFixed(1) : "0"
 
-  const activeBorrows = mockTransactions.filter((t) => t.status === "Borrowed" || t.status === "Overdue").length
+  const activeBorrows = mockTransactions.filter((t) => t.status === "Borrowed").length
 
   const dueSoon = mockTransactions.filter((t) => {
     if (t.status !== "Borrowed") return false
@@ -156,13 +156,13 @@ export default function AdminDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-orange-500" />
-            Due Today & Overdue
+            Due Today & Soon
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {dueSoon.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No items due today or overdue</p>
+              <p className="text-sm text-muted-foreground text-center py-4">No items due today or soon</p>
             ) : (
               dueSoon.map((transaction) => (
                 <div
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                     <div className="text-right">
                       <p className="text-sm font-medium">Due: {new Date(transaction.dueAt).toLocaleDateString()}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(transaction.dueAt) < new Date() ? "Overdue" : "Due today"}
+                        {new Date(transaction.dueAt) < new Date() ? "Past due" : "Due today"}
                       </p>
                     </div>
                     <Badge variant={new Date(transaction.dueAt) < new Date() ? "destructive" : "secondary"}>
