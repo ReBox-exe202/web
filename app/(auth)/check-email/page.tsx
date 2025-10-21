@@ -143,21 +143,6 @@ export default function CheckEmailPage() {
                         </Button>
                     </div>
 
-                    {/* Go to Dashboard Button */}
-                    <div className="pt-2 border-t">
-                        <Button
-                            variant="default"
-                            className="w-full"
-                            onClick={handleGoToDashboard}
-                        >
-                            Continue to Dashboard
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                        <p className="text-xs text-center text-muted-foreground mt-2">
-                            You can verify your email later from the dashboard
-                        </p>
-                    </div>
-
                     {/* Help Text */}
                     <div className="text-center text-sm text-muted-foreground pt-2">
                         <p>Didn't receive the email?</p>
