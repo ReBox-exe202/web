@@ -1,0 +1,12 @@
+HOSTNAME=
+PORT=
+NEXT_PUBLIC_API_URL=http://localhost:5047/api/v1
+RETURN_URL=
+ELEMENT_ID=
+CHECKOUT_URL=
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=206189166567-s3vuc5jcu7ntq044luv3i7qnp99jdcsp.apps.googleusercontent.com
+
+
+PayOS__ClientId=b79c4b23-5cb5-4c82-bf01-8aa88b5cc542
+PayOS__ApiKey=c8519714-5666-4a52-a462-c48a33c40bc4
+PayOS__ChecksumKey=04195dfac3411a4ae332acbdd3669e2913bc1ef40c44f8ad759d21ac443ae449
