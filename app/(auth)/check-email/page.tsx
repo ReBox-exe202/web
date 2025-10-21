@@ -37,7 +37,7 @@ export default function CheckEmailPage() {
 
         setIsResending(true)
         try {
-            await AuthService.sendVerificationEmail(email)
+            await AuthService.sendConfirmEmail(email)
             toast.success("Email sent!", {
                 description: "Please check your inbox and spam folder.",
             })

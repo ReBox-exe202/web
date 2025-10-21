@@ -124,7 +124,7 @@ const AuthService = {
         return result;
     },
 
-    sendVerificationEmail: async (email: string) => {
+    sendConfirmEmail: async (email: string) => {
         const result = await postApi<{ email: string }, SuccessResponse>(
             "/auth/send-confirm-email",
             { email }
