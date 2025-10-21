@@ -48,7 +48,7 @@ export default function RegisterPage() {
       
       // Step 2: Send email verification (don't block on failure)
       try {
-        await AuthService.sendVerificationEmail(email)
+        await AuthService.sendConfirmEmail(email)
         toast.success("Account created!", {
           description: "Please check your email to verify your account.",
         })

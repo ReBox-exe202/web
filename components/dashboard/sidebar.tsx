@@ -14,7 +14,8 @@ import {
   Leaf,
   QrCode,
   X,
-  CreditCard
+  CreditCard,
+  Wallet
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useUIStore } from "@/stores/theme-store"
@@ -27,23 +28,26 @@ export const navigationByRole: NavigationByRole = {
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Tracking", href: "/tracking", icon: MapPin },
     { name: "Projects", href: "/projects", icon: FolderKanban },
-    { name: "Subscription", href: "/subscription", icon: CreditCard },
+    // { name: "Subscription", href: "/subscription", icon: CreditCard },
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Partners", href: "/partners", icon: Users },
     { name: "Returns", href: "/returns", icon: RotateCcw },
     { name: "QR", href: "/qr", icon: QrCode },
     { name: "Package", href: "/package", icon: Package },
+    { name: "Wallet", href: "/wallet", icon: Wallet },
     { name: "Settings", href: "/settings", icon: Settings },
   ],
   [AccountRole.MERCHANT]: [
     { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Package", href: "/package", icon: Package },
     { name: "QR", href: "/qr", icon: QrCode },
+    { name: "Wallet", href: "/wallet", icon: Wallet },
+    { name: "Billing", href: "/billing", icon: CreditCard },
   ],
   [AccountRole.CONSUMER]: [
-    { name: "Inventory", href: "/inventory", icon: Package },
     { name: "Package", href: "/package", icon: Package },
     { name: "QR", href: "/qr", icon: QrCode },
+    { name: "Wallet", href: "/wallet", icon: Wallet },
   ],
   [AccountRole.GUEST]: [],
 }

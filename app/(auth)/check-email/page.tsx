@@ -37,7 +37,7 @@ export default function CheckEmailPage() {
 
         setIsResending(true)
         try {
-            await AuthService.sendVerificationEmail(email)
+            await AuthService.sendConfirmEmail(email)
             toast.success("Email sent!", {
                 description: "Please check your inbox and spam folder.",
             })
@@ -141,21 +141,6 @@ export default function CheckEmailPage() {
                                 </>
                             )}
                         </Button>
-                    </div>
-
-                    {/* Go to Dashboard Button */}
-                    <div className="pt-2 border-t">
-                        <Button
-                            variant="default"
-                            className="w-full"
-                            onClick={handleGoToDashboard}
-                        >
-                            Continue to Dashboard
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                        <p className="text-xs text-center text-muted-foreground mt-2">
-                            You can verify your email later from the dashboard
-                        </p>
                     </div>
 
                     {/* Help Text */}
