@@ -25,8 +25,11 @@ import QRCode from "qrcode"
 import { QRCodeResult } from "@/types/qr.types"
 
 const statusColors = {
-  Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  Sanitizing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  Ready: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  Borrowed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  Returned: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  Washing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  Damaged: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
   Retired: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
 }
 
@@ -50,9 +53,23 @@ export default function InventoryPage() {
   }
 
   const handleReactivate = (id: string) => {
-    setItems(items.map((item) => (item.id === id ? { ...item, status: "Active" as const } : item)))
+    setItems(items.map((item) => (item.id === id ? { ...item, status: "Ready" as const } : item)))
     toast.success("Item reactivated", {
-      description: "The item is now active again.",
+      description: "The item is now ready for use.",
+    })
+  }
+
+  const handleBorrow = (id: string) => {
+    setItems(items.map((item) => (item.id === id ? { ...item, status: "Borrowed" as const } : item)))
+    toast.success("Item borrowed", {
+      description: `Item ${id} has been marked as borrowed.`,
+    })
+  }
+
+  const handleReturn = (id: string) => {
+    setItems(items.map((item) => (item.id === id ? { ...item, status: "Returned" as const } : item)))
+    toast.success("Item returned", {
+      description: `Item ${id} has been marked as returned.`,
     })
   }
 
@@ -299,35 +316,40 @@ export default function InventoryPage() {
       enableHiding: false,
       cell: ({ row }) => {
         const item = row.original
+        const status = item.status as string
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handlePrintQR(item.id)}>
-                <QrCode className="mr-2 h-4 w-4" />
-                Print QR Code
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {item.status === "Active" ? (
-                <DropdownMenuItem onClick={() => handleRetire(item.id)}>
-                  <Archive className="mr-2 h-4 w-4" />
-                  Retire Item
+          <div className="flex items-center gap-2">
+
+            {/* Dropdown menu for other actions */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handlePrintQR(item.id)}>
+                  <QrCode className="mr-2 h-4 w-4" />
+                  Print QR Code
                 </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={() => handleReactivate(item.id)}>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Reactivate Item
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                {item.status === "Retired" ? (
+                  <DropdownMenuItem onClick={() => handleReactivate(item.id)}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Reactivate Item
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => handleRetire(item.id)}>
+                    <Archive className="mr-2 h-4 w-4" />
+                    Retire Item
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )
       },
     },
@@ -374,8 +396,11 @@ export default function InventoryPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Sanitizing">Sanitizing</SelectItem>
+                <SelectItem value="Ready">Ready</SelectItem>
+                <SelectItem value="Borrowed">Borrowed</SelectItem>
+                <SelectItem value="Returned">Returned</SelectItem>
+                <SelectItem value="Washing">Washing</SelectItem>
+                <SelectItem value="Damaged">Damaged</SelectItem>
                 <SelectItem value="Retired">Retired</SelectItem>
               </SelectContent>
             </Select>

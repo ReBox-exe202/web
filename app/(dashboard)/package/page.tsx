@@ -17,8 +17,11 @@ export default function PackagePage() {
   )
 
   const statusColors = {
-    Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    Sanitizing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+    Ready: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    Borrowed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+    Returned: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+    Washing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+    Damaged: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     Retired: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
   }
 
@@ -56,20 +59,20 @@ export default function PackagePage() {
         </Card>
         <Card className="rounded-2xl shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active</CardTitle>
+            <CardTitle className="text-sm font-medium">Ready</CardTitle>
             <Package className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockItems.filter((i) => i.status === "Active").length}</div>
+            <div className="text-2xl font-bold">{mockItems.filter((i) => i.status === "Ready").length}</div>
           </CardContent>
         </Card>
         <Card className="rounded-2xl shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Use</CardTitle>
-            <Package className="h-4 w-4 text-purple-500" />
+            <CardTitle className="text-sm font-medium">Borrowed</CardTitle>
+            <Package className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockItems.filter((i) => i.status === "Sanitizing").length}</div>
+            <div className="text-2xl font-bold">{mockItems.filter((i) => i.status === "Borrowed").length}</div>
           </CardContent>
         </Card>
       </div>
@@ -102,7 +105,10 @@ export default function PackagePage() {
                         {item.dealerId}
                       </Badge>
                     )}
-                    <Badge variant="secondary" className={statusColors[item.status]}>
+                    <Badge 
+                      variant="secondary" 
+                      className={statusColors[item.status as keyof typeof statusColors]}
+                    >
                       {item.status}
                     </Badge>
                   </div>

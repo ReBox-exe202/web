@@ -12,7 +12,7 @@ export interface Account {
 
 export type ItemType = "cup" | "box" | "bowl"
 export type ItemSize = "S" | "M" | "L"
-export type ItemStatus = "Active" | "Sanitizing" | "Retired"
+export type ItemStatus = "Ready" | "Borrowed" | "Returned" | "Washing" | "Damaged" | "Retired" 
 
 export interface Item {
   id: string

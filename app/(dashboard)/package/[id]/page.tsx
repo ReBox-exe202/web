@@ -116,7 +116,7 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
             The package with ID <code className="bg-muted px-2 py-1 rounded font-mono">{id}</code> does not exist.
           </p>
         </div>
-        <Link href="/inventory">
+        <Link href="/package">
           <Button>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Inventory
@@ -127,8 +127,11 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const statusColors = {
-    Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    Sanitizing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+    Ready: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    Borrowed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+    Returned: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+    Washing: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+    Damaged: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     Retired: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
   }
 
@@ -146,10 +149,10 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <Link href="/inventory">
+        <Link href="/package">
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Inventory
+            Back to Package
           </Button>
         </Link>
         <div className="flex items-start justify-between">
@@ -167,26 +170,34 @@ export default function PackageDetailPage({ params }: { params: Promise<{ id: st
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-green-600 hover:bg-green-700"
-              onClick={handleBorrow}
-              disabled={isProcessing}
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              {isProcessing ? "Processing..." : "Borrow"}
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={handleReturn}
-              disabled={isProcessing}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Return
-            </Button>
+            
+            {/* Show Borrow button only if status is Ready */}
+            {packageItem.status === "Ready" && (
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleBorrow}
+                disabled={isProcessing}
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {isProcessing ? "Processing..." : "Borrow"}
+              </Button>
+            )}
+            
+            {/* Show Return button only if status is Borrowed */}
+            {packageItem.status === "Borrowed" && (
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleReturn}
+                disabled={isProcessing}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                {isProcessing ? "Processing..." : "Return"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
