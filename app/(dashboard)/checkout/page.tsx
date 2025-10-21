@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, CreditCard, Lock, Check, Package, Building2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { createPaymentLink } from "@/services/payment.service"
 
 const planDetails = {
   Starter: {
@@ -40,6 +42,8 @@ export default function CheckoutPage() {
   const Icon = plan.icon
 
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -55,29 +59,57 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  // Check if user canceled payment and returned
+  useEffect(() => {
+    const canceled = searchParams.get("canceled")
+    if (canceled === "true") {
+      toast.error("Payment canceled", {
+        description: "You can try again when ready.",
+      })
+      // Clean up the URL
+      const newUrl = `/checkout?plan=${encodeURIComponent(planName)}`
+      router.replace(newUrl)
+    }
+  }, [searchParams, planName, router])
+
   const handlePayment = async () => {
-    // Validate form
-    if (!formData.fullName || !formData.email || !formData.cardNumber) {
-      toast.error("Missing Information", {
-        description: "Please fill in all required fields.",
+    // Basic validation
+    if (!formData.fullName || !formData.email) {
+      toast.error("Missing information", {
+        description: "Please fill in your name and email.",
       })
       return
     }
 
-    setIsProcessing(true)
+    try {
+      setIsProcessing(true)
+      // Create a simple unique order code (epoch ms)
+      const orderCode = Date.now()
+      const subtotal = plan.price
+      const tax = Math.round(plan.price * 0.1)
+      const total = subtotal + tax
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false)
-      toast.success("Payment Successful!", {
-        description: `You've successfully subscribed to the ${plan.name} plan.`,
+      const origin = typeof window !== "undefined" ? window.location.origin : ""
+      const returnUrl = `${origin}/subscription?success=true&plan=${encodeURIComponent(plan.name)}&order=${orderCode}`
+      const cancelUrl = `${origin}/checkout?plan=${encodeURIComponent(planName)}&canceled=true&order=${orderCode}`
+
+      const link = await createPaymentLink({
+        OrderCode: orderCode,
+        Amount: total,
+        Description: `${plan.name} plan subscription`,
+        ReturnUrl: returnUrl,
+        CancelUrl: cancelUrl,
       })
-      
-      // Redirect after success
-      setTimeout(() => {
-        router.push("/subscription?success=true")
-      }, 2000)
-    }, 2000)
+
+      setCheckoutUrl(link)
+      setIsConfirmOpen(true)
+      toast.success("Payment link created", { description: "Ready to redirect to payment." })
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || "Failed to create payment link"
+      toast.error("Payment error", { description: msg })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const subtotal = plan.price
@@ -301,6 +333,28 @@ export default function CheckoutPage() {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Continue to payment?</DialogTitle>
+            <DialogDescription>
+              You'll be redirected to the secure payment page to complete your purchase.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsConfirmOpen(false)}>Cancel</Button>
+            {checkoutUrl && (
+              <Button asChild>
+                <a href={checkoutUrl} target="_blank" rel="noreferrer" onClick={() => setIsConfirmOpen(false)}>
+                  Go to payment
+                </a>
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
