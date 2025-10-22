@@ -1,31 +1,147 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { KpiCard } from "@/components/dashboard/kpi-card"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Wallet, TrendingUp, Package, Leaf, Loader2 } from "lucide-react"
-import { walletApi } from "@/services/wallet.service"
-import { WalletData } from "@/types/wallet.types"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Wallet, Loader2, Plus, DollarSign, CreditCard, TrendingUp, History, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { createPaymentLink } from "@/services/payment.service"
 import { toast } from "sonner"
 
+const AMOUNT_OPTIONS = [
+  { value: 10000, label: "10K" },   // 10,000 VND
+  { value: 20000, label: "20K" },   // 20,000 VND
+  { value: 50000, label: "50K" },   // 50,000 VND
+  { value: 100000, label: "100K" }, // 100,000 VND
+]
+
+// Mock wallet data - simplified for money/balance only
+interface WalletBalance {
+  accountId: string
+  balance: number // Current money balance
+  currency: string
+}
+
+const MOCK_WALLET_DATA: WalletBalance = {
+  accountId: "ACC-001",
+  balance: 105000, // Money balance in VND (105,000 VND)
+  currency: "VND",
+}
+
+// Mock transaction history
+const MOCK_TRANSACTIONS = [
+  { id: "TXN-001", type: "add", amount: 20000, date: new Date("2025-01-09"), description: "Added money to wallet" },
+  { id: "TXN-002", type: "spend", amount: 5000, date: new Date("2025-01-08"), description: "Package rental" },
+  { id: "TXN-003", type: "add", amount: 50000, date: new Date("2025-01-05"), description: "Added money to wallet (with bonus)" },
+  { id: "TXN-004", type: "spend", amount: 3000, date: new Date("2025-01-03"), description: "Package rental" },
+  { id: "TXN-005", type: "add", amount: 10000, date: new Date("2024-12-28"), description: "Added money to wallet" },
+]
+
 export default function WalletPage() {
-  const [wallet, setWallet] = useState<WalletData | null>(null)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [wallet, setWallet] = useState<WalletBalance | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAddMoneyOpen, setIsAddMoneyOpen] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
 
   useEffect(() => {
     fetchWallet()
-  }, [])
+    
+    // Check for payment success/cancel
+    const success = searchParams.get("success")
+    const canceled = searchParams.get("canceled")
+    const amount = searchParams.get("amount")
+    const bonus = searchParams.get("bonus")
+
+    if (success === "true" && amount) {
+      const amountInVND = parseInt(amount)
+      
+      toast.success("Payment successful!", {
+        description: `${amountInVND.toLocaleString("vi-VN")} VND added to your wallet.`,
+      })
+      
+      // Add the money to wallet balance
+      if (wallet) {
+        setWallet({
+          ...wallet,
+          balance: wallet.balance + amountInVND,
+        })
+      }
+      
+      // Clean up URL
+      router.replace("/wallet")
+    } else if (canceled === "true") {
+      toast.error("Payment canceled", {
+        description: "You can try again when ready.",
+      })
+      router.replace("/wallet")
+    }
+  }, [searchParams, router])
 
   const fetchWallet = async () => {
     try {
       setLoading(true)
-      const data = await walletApi.getWallet()
-      setWallet(data)
+      // Simulate API call with mock data
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setWallet(MOCK_WALLET_DATA)
+      
+      // Uncomment below when API is ready
+      // const data = await walletApi.getWallet()
+      // setWallet(data)
     } catch (error) {
       console.error("Error fetching wallet:", error)
       toast.error("Failed to load wallet information")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleAddMoney = (amount: number) => {
+    setSelectedAmount(amount)
+    setIsAddMoneyOpen(false)
+    handlePayment(amount)
+  }
+
+  const handlePayment = async (amount: number) => {
+    try {
+      setIsProcessing(true)
+      // Generate a smaller order code to avoid overflow issues
+      const orderCode = Math.floor(Date.now() / 1000) // Use seconds instead of milliseconds
+
+      const origin = typeof window !== "undefined" ? window.location.origin : ""
+      const returnUrl = `${origin}/wallet?success=true&amount=${amount}&order=${orderCode}`
+      const cancelUrl = `${origin}/wallet?canceled=true&order=${orderCode}`
+
+      console.log("Creating payment link with:", {
+        OrderCode: orderCode,
+        Amount: amount,
+        Description: `Add ${amount.toLocaleString("vi-VN")} VND to wallet`,
+      })
+
+      const link = await createPaymentLink({
+        OrderCode: orderCode,
+        Amount: amount,
+        Description: `Add ${amount.toLocaleString("vi-VN")} VND to wallet`,
+        ReturnUrl: returnUrl,
+        CancelUrl: cancelUrl,
+      })
+
+      setCheckoutUrl(link)
+      setIsConfirmOpen(true)
+      toast.success("Payment link created", { description: "Ready to redirect to payment." })
+    } catch (err: unknown) {
+      console.error("Payment error details:", err)
+      const msg = (err as { message?: string })?.message || "Failed to create payment link"
+      toast.error("Payment error", { description: msg })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -51,128 +167,169 @@ export default function WalletPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Wallet</h1>
-          <p className="text-muted-foreground mt-1">View your rewards, points, and environmental impact</p>
+          <p className="text-muted-foreground mt-1">Manage your account balance and transactions</p>
         </div>
+        <Button onClick={() => setIsAddMoneyOpen(true)} size="lg" className="gap-2">
+          <Plus className="h-5 w-5" />
+          Add Money
+        </Button>
       </div>
 
       {/* Main Balance Card */}
       <Card className="rounded-2xl shadow-sm bg-gradient-to-br from-primary/10 via-primary/5 to-background">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 pb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Current Balance</p>
-              <div className="flex items-baseline gap-2">
-                <h2 className="text-5xl font-bold text-foreground">{wallet.points.toLocaleString()}</h2>
-                <span className="text-xl font-semibold text-muted-foreground">points</span>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Account Balance</p>
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-5xl font-bold text-foreground">{wallet.balance.toLocaleString("vi-VN")}</h2>
+                <span className="text-2xl font-semibold text-muted-foreground">{wallet.currency}</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Lifetime earned: {wallet.lifetimePoints.toLocaleString()} points
+              <p className="text-sm text-muted-foreground mt-3">
+                Account ID: {wallet.accountId}
               </p>
+              <div className="flex gap-3 mt-6">
+                <Button 
+                  className="gap-2"
+                  onClick={() => setIsAddMoneyOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Money
+                </Button>
+                <Button variant="outline" className="gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  View Stats
+                </Button>
+              </div>
             </div>
-            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-              <Wallet className="h-10 w-10 text-primary" />
+            <div className="w-28 h-28 rounded-full bg-primary/20 flex items-center justify-center">
+              <Wallet className="h-14 w-14 text-primary" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <KpiCard
-          title="Lifetime Points"
-          value={wallet.lifetimePoints.toLocaleString()}
-          icon={<TrendingUp className="h-5 w-5" />}
-          description="total earned"
-        />
-        <KpiCard
-          title="Total Returns"
-          value={wallet.totalReturns.toLocaleString()}
-          icon={<Package className="h-5 w-5" />}
-          description="packages returned"
-        />
-        <KpiCard
-          title="CO₂ Saved"
-          value={`${wallet.co2Saved.toLocaleString()}g`}
-          icon={<Leaf className="h-5 w-5" />}
-          description="environmental impact"
-        />
-      </div>
+      {/* Transaction History */}
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            Recent Transactions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {MOCK_TRANSACTIONS.map((transaction) => (
+              <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    transaction.type === "add" 
+                      ? "bg-green-100 dark:bg-green-900/30" 
+                      : "bg-red-100 dark:bg-red-900/30"
+                  }`}>
+                    {transaction.type === "add" ? (
+                      <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <ArrowDownRight className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{transaction.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {transaction.date.toLocaleDateString("en-US", { 
+                        month: "short", 
+                        day: "numeric", 
+                        year: "numeric" 
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`text-sm font-bold ${
+                    transaction.type === "add" 
+                      ? "text-green-600 dark:text-green-400" 
+                      : "text-red-600 dark:text-red-400"
+                  }`}>
+                    {transaction.type === "add" ? "+" : "-"}{transaction.amount.toLocaleString("vi-VN")} VND
+                  </p>
+                  <Badge variant="secondary" className="mt-1 text-xs">
+                    {transaction.id}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Information Cards */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="rounded-2xl shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              How to Earn Points
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/50">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-primary">10</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Return a Package</p>
-                <p className="text-xs text-muted-foreground">Base points for every package returned</p>
-              </div>
+      {/* Add Money Dialog */}
+      <Dialog open={isAddMoneyOpen} onOpenChange={setIsAddMoneyOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Money to Wallet</DialogTitle>
+            <DialogDescription>
+              Select an amount to add to your account balance
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-4">
+            {AMOUNT_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleAddMoney(option.value)}
+                disabled={isProcessing}
+                className="relative p-6 border-2 border-muted hover:border-primary rounded-xl transition-all hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <DollarSign className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <div className="text-2xl font-bold">{option.label}</div>
+                  <div className="text-sm text-muted-foreground">VND</div>
+                </div>
+              </button>
+            ))}
+          </div>
+          <Separator className="my-2" />
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900">
+            <div className="text-blue-600 dark:text-blue-400 text-sm">
+              <p className="font-medium">💡 Quick & Easy!</p>
+              <p className="text-xs mt-1">Select an amount and complete payment securely via PayOS.</p>
             </div>
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/50">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-primary">+5</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Quick Return Bonus</p>
-                <p className="text-xs text-muted-foreground">Extra points for returning within 24 hours</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/50">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm font-bold text-primary">?</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">More Ways Coming Soon</p>
-                <p className="text-xs text-muted-foreground">Stay tuned for additional earning opportunities</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <Card className="rounded-2xl shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
-              Environmental Impact
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">CO₂ Reduction</span>
-                <span className="text-sm font-bold text-green-600">{wallet.co2Saved.toLocaleString()}g</span>
+      {/* Payment Confirmation Dialog */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Continue to payment?</DialogTitle>
+            <DialogDescription>
+              You'll be redirected to the secure payment page to complete your transaction.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedAmount && (
+            <div className="p-4 rounded-lg bg-muted/50 space-y-2">
+              <div className="flex justify-between text-base font-bold">
+                <span>Amount to Pay:</span>
+                <span className="text-primary">{selectedAmount.toLocaleString("vi-VN")} VND</span>
               </div>
-              <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-green-600 rounded-full transition-all"
-                  style={{ width: `${Math.min((wallet.co2Saved / 10000) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Goal: 10,000g CO₂ reduction
+              <p className="text-xs text-muted-foreground pt-2">
+                This amount will be added to your wallet balance after successful payment.
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
-              <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                🌱 Great job!
-              </p>
-              <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                By returning {wallet.totalReturns} package{wallet.totalReturns !== 1 ? 's' : ''}, you've helped reduce waste and save{" "}
-                {wallet.co2Saved.toLocaleString()}g of CO₂ emissions.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setIsConfirmOpen(false)}>Cancel</Button>
+            {checkoutUrl && (
+              <Button asChild>
+                <a href={checkoutUrl} target="_blank" rel="noreferrer" onClick={() => setIsConfirmOpen(false)}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Proceed to Payment
+                </a>
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
