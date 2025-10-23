@@ -28,7 +28,13 @@ axiosClient.interceptors.request.use(
 );
 
 axiosClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Log API responses for debugging
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`[API Response] ${response.config.url}:`, response.data);
+        }
+        return response;
+    },
     (error) => {
         if (error.response) {
             if (error.response.status === 401) {

@@ -48,10 +48,6 @@ export default function CheckoutPage() {
     fullName: "",
     email: "",
     company: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    billingAddress: "",
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,65 +173,6 @@ export default function CheckoutPage() {
                   name="company"
                   placeholder="Your Company Inc."
                   value={formData.company}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment Method */}
-          <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Payment Method
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">
-                  Card Number <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="cardNumber"
-                  name="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  maxLength={19}
-                  value={formData.cardNumber}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="expiryDate">Expiry Date</Label>
-                  <Input
-                    id="expiryDate"
-                    name="expiryDate"
-                    placeholder="MM/YY"
-                    maxLength={5}
-                    value={formData.expiryDate}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    name="cvv"
-                    placeholder="123"
-                    maxLength={4}
-                    value={formData.cvv}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="billingAddress">Billing Address</Label>
-                <Input
-                  id="billingAddress"
-                  name="billingAddress"
-                  placeholder="123 Main St, City, Country"
-                  value={formData.billingAddress}
                   onChange={handleInputChange}
                 />
               </div>

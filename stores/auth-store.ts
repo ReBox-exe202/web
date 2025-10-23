@@ -108,7 +108,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
                     profilePictureUrl: profile.profilePictureUrl,
                     role: roles,
                     status: "active" as Account["status"],
-                    createdAt: profile.createdAt,
+                    createdAt: profile.createdAt,   
                 } as Account;
                 set({ user: mapped, token, isAuthenticated: true });
                 // persist full auth snapshot
