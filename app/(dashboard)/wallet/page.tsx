@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Wallet, Loader2, Plus, DollarSign, CreditCard, TrendingUp, History, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { createPaymentLink } from "@/services/payment.service"
+import { getPaymentStatus } from "@/services/payment.service"
+import { accountApi, consumerApi } from "@/services/account.service"
 import { toast } from "sonner"
 
 const AMOUNT_OPTIONS = [
@@ -25,6 +27,7 @@ interface WalletBalance {
   currency: string
 }
 
+/*
 const MOCK_WALLET_DATA: WalletBalance = {
   accountId: "ACC-001",
   balance: 105000, // Money balance in VND (105,000 VND)
@@ -39,6 +42,7 @@ const MOCK_TRANSACTIONS = [
   { id: "TXN-004", type: "spend", amount: 3000, date: new Date("2025-01-03"), description: "Package rental" },
   { id: "TXN-005", type: "add", amount: 10000, date: new Date("2024-12-28"), description: "Added money to wallet" },
 ]
+*/
 
 export default function WalletPage() {
   const searchParams = useSearchParams()
@@ -50,37 +54,77 @@ export default function WalletPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
+  const [history, setHistory] = useState<string[] | null>(null)
 
   useEffect(() => {
-    fetchWallet()
-    
-    // Check for payment success/cancel
-    const success = searchParams.get("success")
-    const canceled = searchParams.get("canceled")
-    const amount = searchParams.get("amount")
-    const bonus = searchParams.get("bonus")
+  fetchWallet()
 
-    if (success === "true" && amount) {
-      const amountInVND = parseInt(amount)
-      
-      toast.success("Payment successful!", {
-        description: `${amountInVND.toLocaleString("vi-VN")} VND added to your wallet.`,
-      })
-      
-      // Add the money to wallet balance
-      if (wallet) {
-        setWallet({
-          ...wallet,
-          balance: wallet.balance + amountInVND,
-        })
+    // If redirected with success and order code, poll server for authoritative status
+    const success = searchParams.get("success")
+    const order = searchParams.get("order")
+    const canceled = searchParams.get("canceled")
+
+  if (success === "true" && order) {
+      let attempts = 0
+      const maxAttempts = 25
+
+      const check = async () => {
+        try {
+          attempts += 1
+          const statusResp = await getPaymentStatus(order)
+            if (statusResp?.status === "Succeeded") {
+            // Refresh wallet from server
+            try {
+              const data = await accountApi.getWallet()
+              // server returns { balance: number }
+              const updated: WalletBalance = {
+                accountId: wallet?.accountId ?? "",
+                balance: data?.balance ?? wallet?.balance ?? 0,
+                currency: "VND",
+              }
+              setWallet(updated)
+
+              // fetch history as well
+              try {
+                const h = await consumerApi.getHistory()
+                setHistory(h)
+              } catch (e) {
+                // ignore history fetch error
+              }
+            } catch (e) {
+              // fallback: keep existing wallet but notify
+            }
+            toast.success("Payment successful!", { description: "Your wallet has been updated." })
+            router.replace("/wallet")
+            return
+          }
+
+          if (statusResp?.status === "Failed" || statusResp?.status === "Canceled") {
+            toast.error("Payment did not complete", { description: "Please try again or contact support." })
+            router.replace("/wallet")
+            return
+          }
+
+          if (attempts >= maxAttempts) {
+            toast.error("Payment confirmation timed out", { description: "If your card was charged, contact support." })
+            router.replace("/wallet")
+            return
+          }
+
+          setTimeout(check, 2000)
+        } catch (err) {
+          if (attempts >= maxAttempts) {
+            toast.error("Unable to confirm payment", { description: "Please contact support if you were charged." })
+            router.replace("/wallet")
+            return
+          }
+          setTimeout(check, 2000)
+        }
       }
-      
-      // Clean up URL
-      router.replace("/wallet")
+
+      check()
     } else if (canceled === "true") {
-      toast.error("Payment canceled", {
-        description: "You can try again when ready.",
-      })
+      toast.error("Payment canceled", { description: "You can try again when ready." })
       router.replace("/wallet")
     }
   }, [searchParams, router])
@@ -88,13 +132,22 @@ export default function WalletPage() {
   const fetchWallet = async () => {
     try {
       setLoading(true)
-      // Simulate API call with mock data
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setWallet(MOCK_WALLET_DATA)
-      
-      // Uncomment below when API is ready
-      // const data = await walletApi.getWallet()
-      // setWallet(data)
+      // call backend wallet API
+      const data = await accountApi.getWallet()
+      const mapped: WalletBalance = {
+        accountId: "",
+        balance: data?.balance ?? 0,
+        currency: "VND",
+      }
+      setWallet(mapped)
+
+      // fetch consumer history (if available)
+      try {
+        const h = await consumerApi.getHistory()
+        setHistory(h)
+      } catch (e) {
+        setHistory(null)
+      }
     } catch (error) {
       console.error("Error fetching wallet:", error)
       toast.error("Failed to load wallet information")
@@ -219,45 +272,15 @@ export default function WalletPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {MOCK_TRANSACTIONS.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    transaction.type === "add" 
-                      ? "bg-green-100 dark:bg-green-900/30" 
-                      : "bg-red-100 dark:bg-red-900/30"
-                  }`}>
-                    {transaction.type === "add" ? (
-                      <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    ) : (
-                      <ArrowDownRight className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{transaction.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {transaction.date.toLocaleDateString("en-US", { 
-                        month: "short", 
-                        day: "numeric", 
-                        year: "numeric" 
-                      })}
-                    </p>
-                  </div>
+            {history && history.length > 0 ? (
+              history.map((h, idx) => (
+                <div key={idx} className="p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                  <p className="text-sm font-medium">{h}</p>
                 </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold ${
-                    transaction.type === "add" 
-                      ? "text-green-600 dark:text-green-400" 
-                      : "text-red-600 dark:text-red-400"
-                  }`}>
-                    {transaction.type === "add" ? "+" : "-"}{transaction.amount.toLocaleString("vi-VN")} VND
-                  </p>
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {transaction.id}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="p-3 text-sm text-muted-foreground">No recent transactions</div>
+            )}
           </div>
         </CardContent>
       </Card>

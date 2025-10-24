@@ -40,3 +40,18 @@ export async function createPaymentLink(
 	return link;
 }
 
+export interface PaymentStatusResponse {
+	status: string;
+	paidAt?: string | null;
+	amount?: number;
+	currency?: string;
+	failureReason?: string | null;
+}
+
+export async function getPaymentStatus(orderCode: string): Promise<PaymentStatusResponse> {
+	const res = await axiosClient.get<PaymentStatusResponse>("payments/status", {
+		params: { orderCode }
+	});
+	return res.data;
+}
+

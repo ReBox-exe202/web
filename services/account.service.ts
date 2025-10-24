@@ -9,4 +9,16 @@ export const accountApi = {
         );
         return resp.data.data;
     },
+    getWallet: async (): Promise<any> => {
+        const resp = await axiosClient.get<ApiResponse<any>>("/consumers/wallet");
+        return resp.data.data;
+    }
 };
+
+// Consumer history endpoint
+export const consumerApi = {
+    getHistory: async (): Promise<string[]> => {
+        const resp = await axiosClient.get<ApiResponse<string[]>>("/consumers/history");
+        return resp.data.data;
+    }
+}
